@@ -7,11 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+    <!-- Firebase SDK v9 Modular -->
+    <script type="module">
+        // Firebase v9 modular imports will be handled in the main script section
+    </script>
     
     <style>
         :root {
@@ -1972,7 +1971,7 @@
         // Firebase Configuration
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
@@ -2008,6 +2007,43 @@
                 tenureSelect.addEventListener('change', calculateEMI);
             }
         });
+
+        // Test Firebase Connection
+        window.testFirebaseConnection = async function() {
+            try {
+                console.log('🧪 Testing Firebase connection...');
+                await getDoc(doc(db, 'test', 'connection'));
+                console.log('✅ Firebase connection test successful');
+                return true;
+            } catch (error) {
+                console.error('❌ Firebase connection test failed:', error);
+                return false;
+            }
+        };
+
+        // Check if user data exists in Firebase
+        window.checkUserInFirebase = async function(uid) {
+            try {
+                console.log('🔍 Checking user data for UID:', uid);
+                const userDoc = await getDoc(doc(db, 'loanusers', uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    console.log('✅ User found in Firebase:', {
+                        name: userData.name,
+                        mobile: userData.mobile,
+                        email: userData.email,
+                        profileComplete: userData.profileComplete
+                    });
+                    return userData;
+                } else {
+                    console.log('❌ User not found in loanusers collection');
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Error checking user data:', error);
+                return null;
+            }
+        };
 
         // Loan Application Functions
         window.applyForLoan = function() {
@@ -2046,11 +2082,45 @@
         }
 
         // Initialize Firebase
-        console.log('Initializing Firebase...');
+        console.log('🔥 Initializing Firebase...');
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        console.log('Firebase initialized successfully');
+        console.log('✅ Firebase initialized successfully');
+        console.log('📋 Firebase Config:', {
+            projectId: firebaseConfig.projectId,
+            authDomain: firebaseConfig.authDomain,
+            databaseURL: firebaseConfig.databaseURL
+        });
+
+        // Make Firebase instances globally available
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.firebaseDB = db;
+        window.firebaseImports = {
+            setDoc,
+            getDoc,
+            doc,
+            collection,
+            addDoc,
+            updateDoc,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged
+        };
+
+        // Test Firebase connection immediately after initialization
+        setTimeout(async () => {
+            try {
+                console.log('🧪 Testing Firebase after initialization...');
+                await getDoc(doc(db, 'test', 'init'));
+                console.log('✅ Firebase is ready for use');
+            } catch (error) {
+                console.error('❌ Firebase connection issue:', error);
+                console.log('⚠️ Registration may fail - check Firebase configuration');
+            }
+        }, 1000);
 
         // Global variables
         let currentUser = null;
@@ -2239,7 +2309,16 @@
         // Authentication functions
         window.registerUser = async function(name, mobile, password) {
             try {
-                console.log('Starting registration for:', mobile);
+                console.log('🚀 STARTING REGISTRATION PROCESS');
+                console.log('📝 Registration details:', { name, mobile, password: '***' });
+                
+                // Check if Firebase is properly initialized
+                if (!window.firebaseAuth || !window.firebaseDB) {
+                    console.error('❌ Firebase not properly initialized');
+                    throw new Error('Firebase not initialized. Please refresh the page.');
+                }
+                
+                console.log('✅ Firebase instances available');
                 
                 // Validate input
                 if (!name || !mobile || !password) {
@@ -2254,16 +2333,21 @@
                     throw new Error('Password must be at least 6 characters long');
                 }
                 
+                console.log('✅ Input validation passed');
+                
                 // Create user account using mobile as email (mobile@quickcash.app)
                 const userEmail = `${mobile}@quickcash.app`;
+                console.log('📧 Creating user with email:', userEmail);
+                
                 const userCredential = await createUserWithEmailAndPassword(auth, userEmail, password);
-                console.log('User created successfully:', userCredential.user.uid);
+                console.log('✅ Firebase Auth user created successfully');
+                console.log('👤 User UID:', userCredential.user.uid);
                 const user = userCredential.user;
 
                 // Create comprehensive user data matching the exact structure from example
                 const currentTimestamp = Date.now();
                 console.log('🔧 Creating user data structure...');
-                console.log('📊 User details - Name:', name, 'Mobile:', mobile, 'Email:', email);
+                console.log('📊 User details - Name:', name, 'Mobile:', mobile, 'Email:', userEmail);
                 
                 const userData = {
                     // Match the exact structure from the example file
@@ -2455,7 +2539,15 @@
                 
                 try {
                     // Save to loanusers collection - MAIN DATA STORAGE
-                    console.log('🔥 Saving to Firebase: loanusers/' + user.uid);
+                    console.log('🔥 Preparing to save to Firebase: loanusers/' + user.uid);
+                    console.log('📊 Data size:', JSON.stringify(userData).length, 'characters');
+                    
+                    // Test database connection first
+                    console.log('🧪 Testing database connection...');
+                    await getDoc(doc(db, 'test', 'connection'));
+                    console.log('✅ Database connection successful');
+                    
+                    console.log('💾 Saving user data to loanusers collection...');
                     await setDoc(doc(db, 'loanusers', user.uid), userData);
                     console.log('✅ SUCCESS: User data saved to loanusers collection');
                     
@@ -2510,12 +2602,12 @@
                         uid: user.uid,
                         name: name,
                         mobile: mobile,
-                        email: email,
+                        email: userEmail,
                         createdAt: currentTimestamp,
                         role: 'user',
                         status: 'active',
                         registeredAt: currentTimestamp,
-                        profileComplete: 25,
+                        profileComplete: 30,
                         lastUpdated: currentTimestamp
                     };
                     
