@@ -1678,6 +1678,9 @@
 
                 // Create comprehensive user data matching the exact structure from example
                 const currentTimestamp = Date.now();
+                console.log('🔧 Creating user data structure...');
+                console.log('📊 User details - Name:', name, 'Mobile:', mobile, 'Email:', email);
+                
                 const userData = {
                     // Match the exact structure from the example file
                     accountType: "individual",
@@ -1859,26 +1862,63 @@
                 console.log('Saving user data to Firebase loanusers collection...');
                 console.log('User data structure:', userData);
                 
+                console.log('💾 Attempting to save user data to Firebase...');
+                console.log('📋 User data structure:', JSON.stringify(userData, null, 2));
+                
                 try {
-                    await setDoc(doc(db, 'loanusers', user.uid), userData);
+                    // First attempt to save to loanusers collection
+                    console.log('💾 Saving to loanusers collection...');
+                    await setDoc(doc(db, 'loanusers', user.uid), userData, { merge: false });
                     console.log('✅ User data saved successfully to loanusers collection');
                     
                     // Verify the data was saved by reading it back
+                    console.log('🔍 Verifying saved data...');
                     const savedDoc = await getDoc(doc(db, 'loanusers', user.uid));
                     if (savedDoc.exists()) {
-                        console.log('✅ Verified: User data exists in Firebase');
-                        console.log('Saved user data:', savedDoc.data());
+                        const savedData = savedDoc.data();
+                        console.log('✅ VERIFIED: User data exists in Firebase');
+                        console.log('📊 Saved data preview:', {
+                            name: savedData.name,
+                            mobile: savedData.mobile,
+                            email: savedData.email,
+                            uid: savedData.uid,
+                            createdAt: new Date(savedData.timestamps?.createdAt).toLocaleString(),
+                            profileComplete: savedData.profileComplete
+                        });
+                        
+                        // Check specific fields
+                        if (savedData.name === name && savedData.mobile === mobile) {
+                            console.log('✅ Data integrity verified - Name and Mobile match');
+                        } else {
+                            console.warn('⚠️ Data mismatch detected');
+                        }
                     } else {
-                        console.error('❌ User data not found after saving');
+                        console.error('❌ CRITICAL: User data not found after saving');
+                        throw new Error('User data verification failed');
                     }
                 } catch (saveError) {
-                    console.error('❌ Error saving to loanusers:', saveError);
-                    throw saveError;
+                    console.error('❌ CRITICAL ERROR saving to loanusers:', saveError);
+                    console.error('Error details:', saveError.message);
+                    
+                    // Try alternative save method
+                    console.log('🔄 Attempting alternative save method...');
+                    try {
+                        await setDoc(doc(db, 'loanusers', user.uid), {
+                            ...userData,
+                            fallbackSave: true,
+                            fallbackTimestamp: Date.now()
+                        });
+                        console.log('✅ Alternative save successful');
+                    } catch (altError) {
+                        console.error('❌ Alternative save also failed:', altError);
+                        throw new Error(`Firebase save failed: ${saveError.message}`);
+                    }
                 }
 
                 // Also save a backup in 'users' collection for additional reference
+                console.log('💾 Saving backup to users collection...');
                 try {
-                    await setDoc(doc(db, 'users', user.uid), {
+                    const backupData = {
                         uid: user.uid,
                         name: name,
                         mobile: mobile,
@@ -1886,23 +1926,43 @@
                         createdAt: currentTimestamp,
                         role: 'user',
                         status: 'active',
-                        registeredAt: currentTimestamp
-                    });
+                        registeredAt: currentTimestamp,
+                        profileComplete: 25,
+                        lastUpdated: currentTimestamp
+                    };
+                    
+                    await setDoc(doc(db, 'users', user.uid), backupData);
                     console.log('✅ Backup data saved to users collection');
+                    
+                    // Verify backup
+                    const backupDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (backupDoc.exists()) {
+                        console.log('✅ Backup verified in users collection');
+                    }
                 } catch (backupError) {
-                    console.warn('⚠️ Could not save backup to users collection:', backupError);
+                    console.error('❌ Could not save backup to users collection:', backupError);
                 }
 
-                showMessage('Registration successful! User data saved to Firebase. Redirecting...', 'success');
-                console.log('✅ Registration completed successfully');
+                // Final success message with detailed info
+                showMessage(`Registration successful! Welcome ${name}! Data saved to Firebase. Redirecting...`, 'success');
+                
+                console.log('🎉 REGISTRATION COMPLETED SUCCESSFULLY');
                 console.log('📊 User registered with ID:', user.uid);
                 console.log('📱 Mobile:', mobile);
                 console.log('👤 Name:', name);
+                console.log('📧 Email:', email);
+                console.log('⏰ Registered at:', new Date(currentTimestamp).toLocaleString());
+                console.log('🔥 Firebase collections updated: loanusers, users');
                 
                 // Clear the form
-                document.getElementById('registerForm').reset();
+                const registerForm = document.getElementById('registerForm');
+                if (registerForm) {
+                    registerForm.reset();
+                    console.log('✅ Registration form cleared');
+                }
                 
                 // The onAuthStateChanged listener will automatically handle the redirect
+                console.log('⏳ Waiting for auth state change to redirect to home...');
                 return true;
             } catch (error) {
                 console.error('Registration error:', error);
@@ -2066,15 +2126,97 @@
             const popup = document.getElementById('logoutPopup');
             if (popup) {
                 popup.classList.remove('active');
+                
+                // Reset logout button state
+                const logoutBtn = document.querySelector('.logout-confirm-btn');
+                if (logoutBtn) {
+                    logoutBtn.disabled = false;
+                    logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+                }
             }
         };
 
         // Confirm logout from popup
-        window.confirmLogout = function() {
+        window.confirmLogout = async function() {
             console.log('✅ User confirmed logout from popup');
-            hideLogoutPopup();
-            logout();
+            
+            // Disable logout button to prevent multiple clicks
+            const logoutBtn = document.querySelector('.logout-confirm-btn');
+            if (logoutBtn) {
+                logoutBtn.disabled = true;
+                logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging out...';
+            }
+            
+            try {
+                // Hide popup first
+                hideLogoutPopup();
+                
+                // Force logout immediately
+                await forceLogoutProcess();
+                
+            } catch (error) {
+                console.error('❌ Error during logout confirmation:', error);
+                // Force logout anyway
+                forceLogoutProcess();
+            }
         };
+
+        // Force logout process
+        async function forceLogoutProcess() {
+            console.log('🚪 Starting force logout process...');
+            
+            try {
+                // Update user status to offline if possible
+                if (currentUser) {
+                    try {
+                        await setDoc(doc(db, 'loanusers', currentUser.uid), {
+                            'sessionInfo.isOnline': false,
+                            'timestamps.lastLogout': Date.now()
+                        }, { merge: true });
+                        console.log('✅ User status updated to offline');
+                    } catch (updateError) {
+                        console.warn('⚠️ Could not update user status:', updateError);
+                    }
+                }
+                
+                // Sign out from Firebase
+                await signOut(auth);
+                console.log('✅ Firebase sign out successful');
+                
+            } catch (error) {
+                console.error('❌ Firebase logout error:', error);
+            }
+            
+            // Clear all user data regardless of Firebase status
+            currentUser = null;
+            window.currentUserData = null;
+            
+            // Clear UI elements
+            const welcomeElement = document.getElementById('welcome-user');
+            if (welcomeElement) {
+                welcomeElement.textContent = 'Welcome!';
+            }
+            
+            const profileNameElement = document.getElementById('profile-user-name');
+            if (profileNameElement) {
+                profileNameElement.textContent = 'User';
+            }
+            
+            const profileMobileElement = document.getElementById('profile-user-mobile');
+            if (profileMobileElement) {
+                profileMobileElement.textContent = '+91 0000000000';
+            }
+            
+            // Show success message
+            showMessage('Logged out successfully! Redirecting to login...', 'success');
+            
+            // Force redirect to login page
+            setTimeout(() => {
+                forceRedirectToLogin();
+            }, 500);
+            
+            console.log('✅ Force logout process completed');
+        }
 
         // Force redirect to login page
         function forceRedirectToLogin() {
