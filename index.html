@@ -674,16 +674,36 @@
             align-items: center;
             justify-content: center;
             margin-top: 20px;
+            outline: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .logout-btn:focus {
+            outline: 2px solid #ff4757;
+            outline-offset: 2px;
+        }
+        
+        .logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
         }
         
         .logout-btn i {
             margin-right: 10px;
+            font-size: 18px;
         }
         
         .logout-btn:hover {
             background: linear-gradient(135deg, #e84118, #ff4757);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .logout-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
         
         /* Popup Styles */
@@ -1164,7 +1184,7 @@
                 </div>
             </div>
             
-            <button class="logout-btn" onclick="logout()">
+            <button class="logout-btn" onclick="handleLogout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
@@ -1788,9 +1808,10 @@
             }
         };
 
+        // Main logout function
         window.logout = async function() {
             try {
-                console.log('Starting logout process...');
+                console.log('🚪 Starting logout process...');
                 
                 // Update user status to offline before logout
                 if (currentUser) {
@@ -1799,15 +1820,15 @@
                             'sessionInfo.isOnline': false,
                             'timestamps.lastLogout': Date.now()
                         }, { merge: true });
-                        console.log('User status updated to offline');
+                        console.log('✅ User status updated to offline');
                     } catch (updateError) {
-                        console.warn('Could not update user status:', updateError);
+                        console.warn('⚠️ Could not update user status:', updateError);
                     }
                 }
                 
                 // Sign out from Firebase
                 await signOut(auth);
-                console.log('User signed out successfully');
+                console.log('✅ User signed out successfully');
                 
                 // Clear any cached user data
                 currentUser = null;
@@ -1819,29 +1840,66 @@
                     welcomeElement.textContent = 'Welcome!';
                 }
                 
+                const profileNameElement = document.getElementById('profile-user-name');
+                if (profileNameElement) {
+                    profileNameElement.textContent = 'User';
+                }
+                
+                const profileMobileElement = document.getElementById('profile-user-mobile');
+                if (profileMobileElement) {
+                    profileMobileElement.textContent = '+91 0000000000';
+                }
+                
                 // Show success message
                 showMessage('Logged out successfully!', 'success');
                 
-                // Force redirect to auth page
-                setTimeout(() => {
-                    document.getElementById('auth-page').style.display = 'flex';
-                    document.getElementById('home-page').classList.remove('active');
-                    document.getElementById('profile-page').classList.remove('active');
-                    document.getElementById('auth-page').classList.add('active');
-                    console.log('Redirected to auth page');
-                }, 1000);
+                // Force redirect to auth page immediately
+                forceRedirectToAuth();
                 
             } catch (error) {
-                console.error('Logout error:', error);
+                console.error('❌ Logout error:', error);
                 showMessage('Error logging out. Please try again.', 'error');
                 
                 // Force logout even if there's an error
-                currentUser = null;
-                window.currentUserData = null;
-                document.getElementById('auth-page').style.display = 'flex';
-                showPage('auth');
+                forceLogoutAndRedirect();
             }
         };
+
+        // Handle logout button click from profile page
+        window.handleLogout = function() {
+            console.log('🖱️ Logout button clicked from profile page');
+            
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to logout?')) {
+                console.log('✅ User confirmed logout');
+                logout();
+            } else {
+                console.log('❌ User cancelled logout');
+            }
+        };
+
+        // Force redirect to auth page
+        function forceRedirectToAuth() {
+            console.log('🔄 Forcing redirect to auth page...');
+            
+            // Hide all pages
+            document.getElementById('home-page').classList.remove('active');
+            document.getElementById('profile-page').classList.remove('active');
+            
+            // Show auth page
+            document.getElementById('auth-page').style.display = 'flex';
+            document.getElementById('auth-page').classList.add('active');
+            
+            console.log('✅ Redirected to auth page');
+        }
+
+        // Force logout and redirect (fallback)
+        function forceLogoutAndRedirect() {
+            console.log('🚨 Force logout and redirect...');
+            currentUser = null;
+            window.currentUserData = null;
+            forceRedirectToAuth();
+        }
 
         // Loan application function
         window.applyForLoan = async function() {
@@ -2293,6 +2351,12 @@
         window.applyForLoan = applyForLoan;
         window.updateUserProfile = updateUserProfile;
         
+        // Ensure logout functions are available
+        console.log('🔧 Logout functions available:', {
+            logout: typeof window.logout,
+            handleLogout: typeof window.handleLogout
+        });
+        
         // Signal that Firebase is ready
         window.firebaseReady = true;
         console.log('🔥 Firebase initialized and ready');
@@ -2489,11 +2553,39 @@
             }
         }
         
+        // Initialize logout button
+        function initializeLogoutButton() {
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                console.log('✅ Logout button found, adding event listener');
+                
+                // Remove any existing onclick attribute
+                logoutBtn.removeAttribute('onclick');
+                
+                // Add event listener
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🖱️ Logout button clicked via event listener');
+                    handleLogout();
+                });
+                
+                console.log('✅ Logout button event listener added');
+            } else {
+                console.warn('⚠️ Logout button not found, retrying...');
+                setTimeout(initializeLogoutButton, 500);
+            }
+        }
+
         // Initialize quick actions when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeQuickActions);
+            document.addEventListener('DOMContentLoaded', () => {
+                initializeQuickActions();
+                initializeLogoutButton();
+            });
         } else {
             initializeQuickActions();
+            initializeLogoutButton();
         }
 
         // Popup functions
