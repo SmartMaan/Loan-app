@@ -846,9 +846,233 @@
             font-size: 13px;
             color: #666;
             word-break: break-all;
+                }
+
+        /* Logout Popup Styles */
+        .logout-popup-content {
+            max-width: 400px;
+            text-align: center;
+            padding: 0;
+            overflow: hidden;
         }
         
+        .logout-popup-header {
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            padding: 30px 20px 20px;
+            position: relative;
+        }
+        
+        .logout-user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 15px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .logout-popup-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+        }
+        
+        .logout-user-name {
+            font-size: 16px;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .logout-popup-body {
+            padding: 30px 25px;
+            background: white;
+        }
+        
+        .logout-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .logout-message {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .logout-submessage {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .logout-popup-footer {
+            padding: 20px 25px 25px;
+            background: white;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .logout-cancel-btn, .logout-confirm-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .logout-cancel-btn {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+        
+        .logout-cancel-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-confirm-btn {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+        }
+        
+        .logout-confirm-btn:hover {
+            background: linear-gradient(135deg, #e84118, #ff4757);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .logout-cancel-btn:active, .logout-confirm-btn:active {
+            transform: translateY(0);
+        }
 
+        /* Admin Dashboard Styles */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .admin-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px;
+        }
+
+        .admin-menu .menu-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #eee;
+        }
+
+        .admin-menu .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-color: #4a6cf7;
+        }
+
+        .admin-menu .menu-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .admin-menu .menu-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
         
         /* Bottom Navigation */
         .bottom-nav {
@@ -1184,6 +1408,13 @@
                     </div>
                     <div class="menu-text">Terms & Conditions</div>
                 </div>
+                
+                <div class="menu-item admin-only" onclick="showPage('admin')" style="display: none;">
+                    <div class="menu-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="menu-text">Admin Dashboard</div>
+                </div>
             </div>
             
             <button class="logout-btn" onclick="handleLogout()">
@@ -1323,7 +1554,129 @@
         </div>
     </div>
 
+    <!-- Admin Dashboard Page -->
+    <div id="admin-page" class="page">
+        <div class="profile-header">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="logo">
+                <i class="fas fa-user-shield"></i> Admin Dashboard
+            </div>
+            <button class="profile-btn" onclick="showPage('profile')">
+                <i class="fas fa-user"></i>
+            </button>
+        </div>
+        
+        <div class="main-content">
+            <!-- Admin Stats Cards -->
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-users">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="total-loans">0</div>
+                        <div class="stat-label">Total Loans</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="pending-kyc">0</div>
+                        <div class="stat-label">Pending KYC</div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Admin Menu -->
+            <div class="admin-menu">
+                <div class="menu-item" onclick="showUsersManagement()">
+                    <div class="menu-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="menu-text">Users Management</div>
+                </div>
+                
+                <div class="menu-item" onclick="showKYCManagement()">
+                    <div class="menu-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="menu-text">KYC Management</div>
+                </div>
+                
+                <div class="menu-item" onclick="showLoansManagement()">
+                    <div class="menu-icon">
+                        <i class="fas fa-money-check-alt"></i>
+                    </div>
+                    <div class="menu-text">Loans Management</div>
+                </div>
+                
+                <div class="menu-item" onclick="showCreditManagement()">
+                    <div class="menu-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="menu-text">Credit Management</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('home')">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item active" onclick="showPage('admin')">
+                <i class="fas fa-user-shield"></i>
+                <span>Admin</span>
+            </div>
+            <div class="nav-item" onclick="showPage('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Popup -->
+    <div class="popup-overlay" id="logoutPopup">
+        <div class="popup-content logout-popup-content">
+            <div class="logout-popup-header">
+                <div class="logout-user-avatar" id="logout-user-avatar">
+                    U
+                </div>
+                <h3 class="logout-popup-title">Logout Confirmation</h3>
+                <p class="logout-user-name" id="logout-user-name">User</p>
+            </div>
+            <div class="logout-popup-body">
+                <div class="logout-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <p class="logout-message">Are you sure you want to logout from your account?</p>
+                <p class="logout-submessage">You will need to login again to access your account.</p>
+            </div>
+            <div class="logout-popup-footer">
+                <button class="logout-cancel-btn" onclick="hideLogoutPopup()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="logout-confirm-btn" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         // Firebase Configuration
@@ -1474,9 +1827,33 @@
             // Update KYC status display
             updateKYCStatus(kycStatus);
             
+            // Show/Hide admin features based on role
+            showAdminFeatures(userRole);
+            
             // Store user data globally for other functions
             window.currentUserData = userData;
             console.log('User display updated successfully');
+        }
+
+        // Show admin features if user is admin
+        function showAdminFeatures(userRole) {
+            console.log('Checking user role:', userRole);
+            const adminMenuItems = document.querySelectorAll('.admin-only');
+            
+            if (userRole === 'admin') {
+                console.log('✅ Admin role detected - showing admin features');
+                adminMenuItems.forEach(item => {
+                    item.style.display = 'block';
+                });
+                
+                // Load admin dashboard data
+                loadAdminDashboard();
+            } else {
+                console.log('❌ Regular user - hiding admin features');
+                adminMenuItems.forEach(item => {
+                    item.style.display = 'none';
+                });
+            }
         }
 
         // Update KYC status display
@@ -1943,11 +2320,11 @@
             }
         };
 
-        // Handle logout button click from profile page - Direct logout
+        // Handle logout button click from profile page
         window.handleLogout = function() {
             console.log('🖱️ Logout button clicked from profile page');
-            // Direct logout without popup
-            directLogout();
+            // Show logout confirmation popup
+            showLogoutPopup();
         };
 
         // Direct logout function
@@ -1983,6 +2360,367 @@
             
             console.log('✅ Direct logout completed');
         }
+
+        // Show logout confirmation popup
+        window.showLogoutPopup = function() {
+            console.log('📱 Showing logout popup');
+            
+            // Update popup with current user info
+            const userData = window.currentUserData || {};
+            const userName = userData.name || userData.personalDetails?.fullName || 'User';
+            
+            // Update popup elements
+            const logoutUserName = document.getElementById('logout-user-name');
+            const logoutUserAvatar = document.getElementById('logout-user-avatar');
+            
+            if (logoutUserName) {
+                logoutUserName.textContent = userName;
+            }
+            
+            if (logoutUserAvatar) {
+                logoutUserAvatar.textContent = userName.charAt(0).toUpperCase();
+            }
+            
+            // Show popup
+            const popup = document.getElementById('logoutPopup');
+            if (popup) {
+                popup.classList.add('active');
+                console.log('✅ Logout popup displayed');
+            }
+        };
+
+        // Hide logout popup
+        window.hideLogoutPopup = function() {
+            console.log('❌ Hiding logout popup');
+            const popup = document.getElementById('logoutPopup');
+            if (popup) {
+                popup.classList.remove('active');
+            }
+        };
+
+        // Confirm logout from popup
+        window.confirmLogout = function() {
+            console.log('✅ User confirmed logout from popup');
+            hideLogoutPopup();
+            directLogout();
+        };
+
+        // Admin Dashboard Functions
+        async function loadAdminDashboard() {
+            if (!currentUser || !window.currentUserData || window.currentUserData.role !== 'admin') {
+                console.log('❌ Access denied - not an admin');
+                return;
+            }
+
+            console.log('📊 Loading admin dashboard data...');
+            
+            try {
+                // Load all users
+                const usersSnapshot = await getDocs(collection(db, 'loanusers'));
+                const totalUsers = usersSnapshot.size;
+                
+                // Load all loans
+                const loansSnapshot = await getDocs(collection(db, 'loans'));
+                const totalLoans = loansSnapshot.size;
+                
+                // Count pending KYC
+                let pendingKYC = 0;
+                usersSnapshot.forEach(doc => {
+                    const userData = doc.data();
+                    if (userData.kycDocuments?.status === 'pending') {
+                        pendingKYC++;
+                    }
+                });
+                
+                // Update dashboard stats
+                document.getElementById('total-users').textContent = totalUsers;
+                document.getElementById('total-loans').textContent = totalLoans;
+                document.getElementById('pending-kyc').textContent = pendingKYC;
+                
+                console.log('✅ Admin dashboard loaded:', { totalUsers, totalLoans, pendingKYC });
+                
+            } catch (error) {
+                console.error('❌ Error loading admin dashboard:', error);
+            }
+        }
+
+        // Admin Management Functions
+        window.showUsersManagement = async function() {
+            console.log('👥 Opening Users Management');
+            
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'loanusers'));
+                let usersHtml = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: #4a6cf7; margin: 0;">Users Management</h3>
+                                <button onclick="this.closest('div').parentElement.remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                            </div>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                `;
+                
+                usersSnapshot.forEach(doc => {
+                    const userData = doc.data();
+                    const userName = userData.name || 'Unknown';
+                    const userMobile = userData.mobile || 'N/A';
+                    const userStatus = userData.status || 'active';
+                    const kycStatus = userData.kycDocuments?.status || 'pending';
+                    
+                    usersHtml += `
+                        <div style="border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${userName}</strong><br>
+                                <small>📱 ${userMobile}</small><br>
+                                <span style="background: ${userStatus === 'active' ? '#28a745' : '#dc3545'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${userStatus}</span>
+                                <span style="background: ${kycStatus === 'verified' ? '#28a745' : kycStatus === 'rejected' ? '#dc3545' : '#ffc107'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 5px;">KYC: ${kycStatus}</span>
+                            </div>
+                            <div>
+                                <button onclick="changeUserStatus('${doc.id}', '${userStatus === 'active' ? 'inactive' : 'active'}')" style="background: #4a6cf7; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 2px; cursor: pointer;">
+                                    ${userStatus === 'active' ? 'Deactivate' : 'Activate'}
+                                </button>
+                                <button onclick="changeKYCStatus('${doc.id}', 'verified')" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 2px; cursor: pointer;">Verify KYC</button>
+                                <button onclick="changeKYCStatus('${doc.id}', 'rejected')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 2px; cursor: pointer;">Reject KYC</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                usersHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', usersHtml);
+                
+            } catch (error) {
+                console.error('❌ Error loading users:', error);
+                alert('Error loading users');
+            }
+        };
+
+        window.showKYCManagement = async function() {
+            console.log('🆔 Opening KYC Management');
+            
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'loanusers'));
+                let kycHtml = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: #4a6cf7; margin: 0;">KYC Management</h3>
+                                <button onclick="this.closest('div').parentElement.remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                            </div>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                `;
+                
+                usersSnapshot.forEach(doc => {
+                    const userData = doc.data();
+                    const userName = userData.name || 'Unknown';
+                    const kycStatus = userData.kycDocuments?.status || 'pending';
+                    const aadhar = userData.kycDocuments?.aadharNumber || 'Not provided';
+                    const pan = userData.kycDocuments?.panNumber || 'Not provided';
+                    
+                    if (kycStatus === 'pending' || kycStatus === 'processing') {
+                        kycHtml += `
+                            <div style="border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${userName}</strong><br>
+                                        <small>Aadhar: ${aadhar}</small><br>
+                                        <small>PAN: ${pan}</small><br>
+                                        <span style="background: #ffc107; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${kycStatus}</span>
+                                    </div>
+                                    <div>
+                                        <button onclick="changeKYCStatus('${doc.id}', 'verified')" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 2px; cursor: pointer;">✅ Approve</button>
+                                        <button onclick="changeKYCStatus('${doc.id}', 'rejected')" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 2px; cursor: pointer;">❌ Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                kycHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', kycHtml);
+                
+            } catch (error) {
+                console.error('❌ Error loading KYC data:', error);
+                alert('Error loading KYC data');
+            }
+        };
+
+        window.showLoansManagement = async function() {
+            console.log('💰 Opening Loans Management');
+            
+            try {
+                const loansSnapshot = await getDocs(collection(db, 'loans'));
+                let loansHtml = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 900px; max-height: 80vh; overflow-y: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: #4a6cf7; margin: 0;">Loans Management</h3>
+                                <button onclick="this.closest('div').parentElement.remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                            </div>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                `;
+                
+                loansSnapshot.forEach(doc => {
+                    const loanData = doc.data();
+                    const loanId = loanData.applicationNumber || doc.id;
+                    const amount = loanData.loanAmount?.requested || 0;
+                    const status = loanData.status?.current || 'pending';
+                    const userName = loanData.applicantInfo?.name || 'Unknown';
+                    
+                    loansHtml += `
+                        <div style="border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>Loan ID: ${loanId}</strong><br>
+                                    <small>👤 ${userName}</small><br>
+                                    <small>💰 ₹${amount.toLocaleString()}</small><br>
+                                    <span style="background: ${status === 'approved' ? '#28a745' : status === 'rejected' ? '#dc3545' : '#ffc107'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${status}</span>
+                                </div>
+                                <div>
+                                    <button onclick="changeLoanStatus('${doc.id}', 'approved')" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 2px; cursor: pointer;">✅ Approve</button>
+                                    <button onclick="changeLoanStatus('${doc.id}', 'rejected')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 2px; cursor: pointer;">❌ Reject</button>
+                                    <button onclick="changeLoanStatus('${doc.id}', 'processing')" style="background: #ffc107; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin: 2px; cursor: pointer;">⏳ Process</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                loansHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', loansHtml);
+                
+            } catch (error) {
+                console.error('❌ Error loading loans:', error);
+                alert('Error loading loans');
+            }
+        };
+
+        window.showCreditManagement = function() {
+            console.log('💳 Opening Credit Management');
+            
+            const creditHtml = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: #4a6cf7; margin: 0;">Credit Management</h3>
+                            <button onclick="this.closest('div').parentElement.remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                        </div>
+                        <form onsubmit="updateUserCredit(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">User Mobile Number:</label>
+                                <input type="text" id="credit-mobile" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" placeholder="Enter mobile number" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Credit Limit:</label>
+                                <input type="number" id="credit-limit" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" placeholder="Enter credit limit" required>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Eligible Amount:</label>
+                                <input type="number" id="eligible-amount" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" placeholder="Enter eligible amount" required>
+                            </div>
+                            <button type="submit" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #4a6cf7, #8a3ffb); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Update Credit</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', creditHtml);
+        };
+
+        // Admin Action Functions
+        window.changeUserStatus = async function(userId, newStatus) {
+            try {
+                await setDoc(doc(db, 'loanusers', userId), {
+                    status: newStatus,
+                    'timestamps.lastUpdated': Date.now()
+                }, { merge: true });
+                
+                alert(`User status changed to ${newStatus}`);
+                location.reload(); // Refresh to show updated data
+            } catch (error) {
+                console.error('Error updating user status:', error);
+                alert('Error updating user status');
+            }
+        };
+
+        window.changeKYCStatus = async function(userId, newStatus) {
+            try {
+                await setDoc(doc(db, 'loanusers', userId), {
+                    'kycDocuments.status': newStatus,
+                    'timestamps.lastUpdated': Date.now()
+                }, { merge: true });
+                
+                alert(`KYC status changed to ${newStatus}`);
+                location.reload(); // Refresh to show updated data
+            } catch (error) {
+                console.error('Error updating KYC status:', error);
+                alert('Error updating KYC status');
+            }
+        };
+
+        window.changeLoanStatus = async function(loanId, newStatus) {
+            try {
+                await setDoc(doc(db, 'loans', loanId), {
+                    'status.current': newStatus,
+                    'timestamps.lastUpdated': Date.now()
+                }, { merge: true });
+                
+                alert(`Loan status changed to ${newStatus}`);
+                location.reload(); // Refresh to show updated data
+            } catch (error) {
+                console.error('Error updating loan status:', error);
+                alert('Error updating loan status');
+            }
+        };
+
+        window.updateUserCredit = async function(event) {
+            event.preventDefault();
+            
+            const mobile = document.getElementById('credit-mobile').value;
+            const creditLimit = parseInt(document.getElementById('credit-limit').value);
+            const eligibleAmount = parseInt(document.getElementById('eligible-amount').value);
+            
+            try {
+                // Find user by mobile number
+                const usersQuery = query(collection(db, 'loanusers'), where('mobile', '==', mobile));
+                const usersSnapshot = await getDocs(usersQuery);
+                
+                if (usersSnapshot.empty) {
+                    alert('User not found with this mobile number');
+                    return;
+                }
+                
+                const userDoc = usersSnapshot.docs[0];
+                await setDoc(doc(db, 'loanusers', userDoc.id), {
+                    'loanDetails.creditLimit': creditLimit,
+                    'loanDetails.eligibleAmount': eligibleAmount,
+                    'timestamps.lastUpdated': Date.now()
+                }, { merge: true });
+                
+                alert('User credit updated successfully!');
+                event.target.closest('div').parentElement.remove();
+                
+            } catch (error) {
+                console.error('Error updating user credit:', error);
+                alert('Error updating user credit');
+            }
+        };
 
 
 
@@ -2794,13 +3532,20 @@
             }
         });
 
-        document.getElementById('contactPopup').addEventListener('click', function(e) {
+                document.getElementById('contactPopup').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideContactPopup();
             }
         });
 
+        // Close logout popup when clicking outside
+        document.getElementById('logoutPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideLogoutPopup();
+            }
+        });
 
+ 
     </script>
 </body>
 </html>
