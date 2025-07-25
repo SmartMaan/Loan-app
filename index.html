@@ -194,6 +194,14 @@
             padding-right: 40px;
         }
         
+        .form-help {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        
         /* Loan Application Page Styles */
         .loan-form-container {
             padding: 20px;
@@ -1351,6 +1359,12 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="reg-email">Email Address (Optional)</label>
+                        <input type="email" id="reg-email" name="email" class="form-control" placeholder="Enter your email address (optional)">
+                        <small class="form-help">Email helps us keep you updated about your loan status</small>
+                    </div>
+                    
+                    <div class="form-group">
                         <label for="reg-password">Password (min 6 characters)</label>
                         <div class="password-container">
                             <input type="password" id="reg-password" name="password" class="form-control" placeholder="Create password" minlength="6" required>
@@ -2032,6 +2046,7 @@
                         name: userData.name,
                         mobile: userData.mobile,
                         email: userData.email,
+                        providedEmail: userData.providedEmail,
                         profileComplete: userData.profileComplete
                     });
                     return userData;
@@ -2041,6 +2056,61 @@
                 }
             } catch (error) {
                 console.error('❌ Error checking user data:', error);
+                return null;
+            }
+        };
+
+        // Get all registered users (for admin)
+        window.getAllRegisteredUsers = async function() {
+            try {
+                console.log('📋 Fetching all registered users...');
+                const querySnapshot = await getDocs(collection(db, 'loanusers'));
+                const users = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    users.push({
+                        uid: doc.id,
+                        name: userData.name,
+                        mobile: userData.mobile,
+                        email: userData.email,
+                        providedEmail: userData.providedEmail,
+                        registeredAt: new Date(userData.timestamps?.registeredAt).toLocaleString(),
+                        profileComplete: userData.profileComplete,
+                        kycStatus: userData.kycDocuments?.status || 'pending',
+                        status: userData.status
+                    });
+                });
+                
+                console.log(`✅ Found ${users.length} registered users:`);
+                console.table(users);
+                return users;
+            } catch (error) {
+                console.error('❌ Error fetching users:', error);
+                return [];
+            }
+        };
+
+        // Get user summary for admin dashboard
+        window.getUserSummary = async function() {
+            try {
+                const users = await getAllRegisteredUsers();
+                const summary = {
+                    totalUsers: users.length,
+                    activeUsers: users.filter(u => u.status === 'active').length,
+                    pendingKYC: users.filter(u => u.kycStatus === 'pending').length,
+                    verifiedKYC: users.filter(u => u.kycStatus === 'verified').length,
+                    recentRegistrations: users.filter(u => {
+                        const regTime = new Date(u.registeredAt);
+                        const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                        return regTime > dayAgo;
+                    }).length
+                };
+                
+                console.log('📊 User Summary:', summary);
+                return summary;
+            } catch (error) {
+                console.error('❌ Error generating user summary:', error);
                 return null;
             }
         };
@@ -2236,7 +2306,8 @@
             
             const profileMobileElement = document.getElementById('profile-user-mobile');
             if (profileMobileElement) {
-                profileMobileElement.textContent = userMobile;
+                const emailInfo = userData.providedEmail ? ` • ${userData.providedEmail}` : '';
+                profileMobileElement.textContent = userMobile + emailInfo;
             }
             
             const avatarElement = document.getElementById('user-avatar');
@@ -2307,10 +2378,15 @@
         }
 
         // Authentication functions
-        window.registerUser = async function(name, mobile, password) {
+        window.registerUser = async function(name, mobile, password, userEmail = '') {
             try {
                 console.log('🚀 STARTING REGISTRATION PROCESS');
-                console.log('📝 Registration details:', { name, mobile, password: '***' });
+                console.log('📝 Registration details:', { 
+                    name, 
+                    mobile, 
+                    email: userEmail || '(not provided)', 
+                    password: '***' 
+                });
                 
                 // Check if Firebase is properly initialized
                 if (!window.firebaseAuth || !window.firebaseDB) {
@@ -2335,11 +2411,12 @@
                 
                 console.log('✅ Input validation passed');
                 
-                // Create user account using mobile as email (mobile@quickcash.app)
-                const userEmail = `${mobile}@quickcash.app`;
-                console.log('📧 Creating user with email:', userEmail);
+                // Create user account - use provided email or mobile@quickcash.app
+                const authEmail = userEmail && userEmail.includes('@') ? userEmail : `${mobile}@quickcash.app`;
+                console.log('📧 Creating Firebase Auth user with email:', authEmail);
+                console.log('👤 User provided email:', userEmail || 'None provided');
                 
-                const userCredential = await createUserWithEmailAndPassword(auth, userEmail, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
                 console.log('✅ Firebase Auth user created successfully');
                 console.log('👤 User UID:', userCredential.user.uid);
                 const user = userCredential.user;
@@ -2347,7 +2424,7 @@
                 // Create comprehensive user data matching the exact structure from example
                 const currentTimestamp = Date.now();
                 console.log('🔧 Creating user data structure...');
-                console.log('📊 User details - Name:', name, 'Mobile:', mobile, 'Email:', userEmail);
+                console.log('📊 User details - Name:', name, 'Mobile:', mobile, 'Email:', authEmail, 'Optional Email:', userEmail || 'None');
                 
                 const userData = {
                     // Match the exact structure from the example file
@@ -2380,14 +2457,15 @@
                         supportTickets: 0
                     },
                     contactInfo: {
-                        alternateEmail: "",
-                        email: userEmail,
+                        alternateEmail: userEmail && userEmail !== authEmail ? userEmail : "",
+                        email: authEmail,
                         primaryPhone: mobile,
                         secondaryPhone: "",
                         telegram: "",
                         whatsapp: mobile
                     },
-                    email: userEmail,
+                    email: authEmail,
+                    providedEmail: userEmail || "",
                     emailVerified: false,
                     employmentDetails: {
                         annualIncome: 0,
@@ -2602,7 +2680,7 @@
                         uid: user.uid,
                         name: name,
                         mobile: mobile,
-                        email: userEmail,
+                        email: authEmail,
                         createdAt: currentTimestamp,
                         role: 'user',
                         status: 'active',
@@ -2943,6 +3021,87 @@
             } catch (error) {
                 console.error('❌ Error loading users:', error);
                 alert('Error loading users');
+            }
+        };
+
+        window.showUsersManagement = async function() {
+            console.log('👥 Opening Users Management');
+            
+            try {
+                const users = await getAllRegisteredUsers();
+                
+                let usersHtml = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: white; padding: 20px; border-radius: 15px; width: 95%; max-width: 900px; max-height: 80vh; overflow-y: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: #4a6cf7; margin: 0;">Registered Users Management</h3>
+                                <button onclick="this.closest('div').parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">✕ Close</button>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                <strong>Total Users: ${users.length}</strong> | 
+                                Active: ${users.filter(u => u.status === 'active').length} | 
+                                Pending KYC: ${users.filter(u => u.kycStatus === 'pending').length} | 
+                                Verified: ${users.filter(u => u.kycStatus === 'verified').length}
+                            </div>
+                            
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                                    <thead>
+                                        <tr style="background: #4a6cf7; color: white;">
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Name</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Mobile</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Email</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Provided Email</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Registered</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Profile</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">KYC</th>
+                                            <th style="padding: 8px; border: 1px solid #ddd;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                `;
+                
+                users.forEach(user => {
+                    const kycColor = user.kycStatus === 'verified' ? '#28a745' : user.kycStatus === 'rejected' ? '#dc3545' : '#ffc107';
+                    const statusColor = user.status === 'active' ? '#28a745' : '#dc3545';
+                    
+                    usersHtml += `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px; border: 1px solid #ddd;">${user.name}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${user.mobile}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-size: 10px;">${user.email}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; color: #4a6cf7;">${user.providedEmail || 'Not provided'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-size: 10px;">${user.registeredAt}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${user.profileComplete}%</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                                <span style="background: ${kycColor}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px;">${user.kycStatus}</span>
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                                <span style="background: ${statusColor}; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px;">${user.status}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                usersHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="window.getUserSummary()" style="background: #4a6cf7; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px; cursor: pointer;">📊 Show Summary</button>
+                                <button onclick="window.getAllRegisteredUsers()" style="background: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px; cursor: pointer;">🔄 Refresh Data</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', usersHtml);
+                
+            } catch (error) {
+                console.error('❌ Error loading users data:', error);
+                alert('Error loading users data');
             }
         };
 
@@ -3769,14 +3928,15 @@
                 registerForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
-                    // Collect form data (simple form)
+                    // Collect form data (simple form with optional email)
                     const name = document.getElementById('reg-name').value.trim();
                     const mobile = document.getElementById('reg-mobile').value.trim();
+                    const email = document.getElementById('reg-email').value.trim();
                     const password = document.getElementById('reg-password').value;
                     const confirmPassword = document.getElementById('reg-confirm-password').value;
                     
                     console.log('Registration form submitted with data:', { 
-                        name, mobile, password: password ? '***' : 'empty'
+                        name, mobile, email: email || '(not provided)', password: password ? '***' : 'empty'
                     });
                     
                     // Validate required fields
@@ -3803,7 +3963,7 @@
                         console.log('📱 Mobile:', mobile);
                         console.log('👤 Name:', name);
                         
-                        const success = await window.registerUser(name, mobile, password);
+                        const success = await window.registerUser(name, mobile, password, email);
                         
                         if (success) {
                             console.log('✅ Registration successful, clearing form');
