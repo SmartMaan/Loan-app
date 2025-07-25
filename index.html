@@ -1352,96 +1352,6 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="reg-email">Email Address (Optional)</label>
-                        <input type="email" id="reg-email" name="email" class="form-control" placeholder="Enter your email">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-dob">Date of Birth</label>
-                        <input type="date" id="reg-dob" name="dateOfBirth" class="form-control" max="" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-gender">Gender</label>
-                        <select id="reg-gender" name="gender" class="form-control" required>
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-occupation">Occupation</label>
-                        <select id="reg-occupation" name="occupation" class="form-control" required>
-                            <option value="">Select Occupation</option>
-                            <option value="Salaried">Salaried Employee</option>
-                            <option value="Business">Business Owner</option>
-                            <option value="Self Employed">Self Employed</option>
-                            <option value="Student">Student</option>
-                            <option value="Unemployed">Unemployed</option>
-                            <option value="Retired">Retired</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-monthly-income">Monthly Income (₹)</label>
-                        <input type="number" id="reg-monthly-income" name="monthlyIncome" class="form-control" placeholder="Enter monthly income" min="0">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-city">City</label>
-                        <input type="text" id="reg-city" name="city" class="form-control" placeholder="Enter your city" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-state">State</label>
-                        <select id="reg-state" name="state" class="form-control" required>
-                            <option value="">Select State</option>
-                            <option value="Andhra Pradesh">Andhra Pradesh</option>
-                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                            <option value="Assam">Assam</option>
-                            <option value="Bihar">Bihar</option>
-                            <option value="Chhattisgarh">Chhattisgarh</option>
-                            <option value="Goa">Goa</option>
-                            <option value="Gujarat">Gujarat</option>
-                            <option value="Haryana">Haryana</option>
-                            <option value="Himachal Pradesh">Himachal Pradesh</option>
-                            <option value="Jharkhand">Jharkhand</option>
-                            <option value="Karnataka">Karnataka</option>
-                            <option value="Kerala">Kerala</option>
-                            <option value="Madhya Pradesh">Madhya Pradesh</option>
-                            <option value="Maharashtra">Maharashtra</option>
-                            <option value="Manipur">Manipur</option>
-                            <option value="Meghalaya">Meghalaya</option>
-                            <option value="Mizoram">Mizoram</option>
-                            <option value="Nagaland">Nagaland</option>
-                            <option value="Odisha">Odisha</option>
-                            <option value="Punjab">Punjab</option>
-                            <option value="Rajasthan">Rajasthan</option>
-                            <option value="Sikkim">Sikkim</option>
-                            <option value="Tamil Nadu">Tamil Nadu</option>
-                            <option value="Telangana">Telangana</option>
-                            <option value="Tripura">Tripura</option>
-                            <option value="Uttar Pradesh">Uttar Pradesh</option>
-                            <option value="Uttarakhand">Uttarakhand</option>
-                            <option value="West Bengal">West Bengal</option>
-                            <option value="Delhi">Delhi</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-pincode">PIN Code</label>
-                        <input type="text" id="reg-pincode" name="pincode" class="form-control" placeholder="Enter 6-digit PIN code" pattern="[0-9]{6}" maxlength="6" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="reg-referral">Referral Code (Optional)</label>
-                        <input type="text" id="reg-referral" name="referralCode" class="form-control" placeholder="Enter referral code if any">
-                    </div>
-                    
-                    <div class="form-group">
                         <label for="reg-password">Password (min 6 characters)</label>
                         <div class="password-container">
                             <input type="password" id="reg-password" name="password" class="form-control" placeholder="Create password" minlength="6" required>
@@ -1455,14 +1365,6 @@
                             <input type="password" id="reg-confirm-password" name="confirm_password" class="form-control" placeholder="Confirm password" minlength="6" required>
                             <i class="toggle-password fas fa-eye" onclick="togglePassword('reg-confirm-password', this)"></i>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="checkbox-container">
-                            <input type="checkbox" id="reg-terms" name="acceptTerms" required>
-                            <span class="checkmark"></span>
-                            I accept the <a href="#" onclick="showTermsPopup(); return false;">Terms & Conditions</a> and <a href="#" onclick="showPrivacyPopup(); return false;">Privacy Policy</a>
-                        </label>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
@@ -2083,15 +1985,8 @@
             measurementId: "G-ENCBTT4BL8"
         };
 
-        // Set max date for date of birth (18 years ago) and initialize loan functions
+        // Initialize loan application functionality
         window.addEventListener('DOMContentLoaded', function() {
-            const dobField = document.getElementById('reg-dob');
-            if (dobField) {
-                const today = new Date();
-                const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-                dobField.max = eighteenYearsAgo.toISOString().split('T')[0];
-            }
-            
             // Initialize loan application functionality
             const amountInput = document.getElementById('loan-amount');
             const amountSlider = document.getElementById('amount-slider');
@@ -2342,9 +2237,8 @@
         }
 
         // Authentication functions
-        window.registerUser = async function(formData) {
+        window.registerUser = async function(name, mobile, password) {
             try {
-                const { name, mobile, password, email, dateOfBirth, gender, occupation, monthlyIncome, city, state, pincode, referralCode } = formData;
                 console.log('Starting registration for:', mobile);
                 
                 // Validate input
@@ -2360,41 +2254,8 @@
                     throw new Error('Password must be at least 6 characters long');
                 }
                 
-                if (!dateOfBirth) {
-                    throw new Error('Date of birth is required');
-                }
-                
-                if (!gender) {
-                    throw new Error('Gender selection is required');
-                }
-                
-                if (!occupation) {
-                    throw new Error('Occupation selection is required');
-                }
-                
-                if (!city || !state || !pincode) {
-                    throw new Error('City, state, and PIN code are required');
-                }
-                
-                if (pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
-                    throw new Error('Please enter a valid 6-digit PIN code');
-                }
-                
-                // Calculate age from date of birth
-                const birthDate = new Date(dateOfBirth);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-                
-                if (age < 18) {
-                    throw new Error('You must be at least 18 years old to register');
-                }
-                
                 // Create user account using mobile as email (mobile@quickcash.app)
-                const userEmail = email || `${mobile}@quickcash.app`;
+                const userEmail = `${mobile}@quickcash.app`;
                 const userCredential = await createUserWithEmailAndPassword(auth, userEmail, password);
                 console.log('User created successfully:', userCredential.user.uid);
                 const user = userCredential.user;
@@ -2409,22 +2270,22 @@
                     accountType: "individual",
                     addressDetails: {
                         currentAddress: {
-                            city: city,
+                            city: "",
                             district: "",
                             landmark: "",
-                            pincode: pincode,
+                            pincode: "",
                             residenceType: "",
-                            state: state,
+                            state: "",
                             stayingFrom: "",
                             street: ""
                         },
                         permanentAddress: {
-                            city: city,
+                            city: "",
                             district: "",
                             landmark: "",
-                            pincode: pincode,
-                            sameAsCurrent: true,
-                            state: state,
+                            pincode: "",
+                            sameAsCurrent: false,
+                            state: "",
                             street: ""
                         }
                     },
@@ -2435,7 +2296,7 @@
                         supportTickets: 0
                     },
                     contactInfo: {
-                        alternateEmail: email && email !== userEmail ? email : "",
+                        alternateEmail: "",
                         email: userEmail,
                         primaryPhone: mobile,
                         secondaryPhone: "",
@@ -2445,12 +2306,12 @@
                     email: userEmail,
                     emailVerified: false,
                     employmentDetails: {
-                        annualIncome: monthlyIncome ? monthlyIncome * 12 : 0,
+                        annualIncome: 0,
                         companyAddress: "",
                         companyName: "",
                         designation: "",
-                        employmentType: occupation,
-                        monthlyIncome: parseInt(monthlyIncome) || 0,
+                        employmentType: "",
+                        monthlyIncome: 0,
                         officePhone: "",
                         salaryMode: "",
                         workExperience: 0,
@@ -2515,17 +2376,17 @@
                     name: name,
                     password: password,
                     personalDetails: {
-                        age: age,
+                        age: 0,
                         category: "",
-                        dateOfBirth: dateOfBirth,
+                        dateOfBirth: "",
                         experience: 0,
                         fatherName: "",
                         fullName: name,
-                        gender: gender,
+                        gender: "",
                         maritalStatus: "",
                         motherName: "",
                         nationality: "Indian",
-                        occupation: occupation,
+                        occupation: "",
                         qualification: "",
                         religion: ""
                     },
@@ -2544,7 +2405,7 @@
                         },
                         repaymentPreference: "Monthly"
                     },
-                    profileComplete: 25,
+                    profileComplete: 30,
                     appVersion: "1.0.0",
                     deviceId: `${navigator.platform}_${Date.now()}`,
                     referralInfo: {
@@ -2552,8 +2413,8 @@
                         referralEarnings: 0,
                         successfulReferrals: 0,
                         totalReferrals: 0,
-                        referredBy: referralCode || "",
-                        referralBonus: referralCode ? 100 : 0
+                        referredBy: "",
+                        referralBonus: 0
                     },
                     role: "user",
                     sessionInfo: {
@@ -2582,17 +2443,21 @@
                 };
 
                 // Save to loanusers collection with UID as document ID
-                console.log('Saving user data to Firebase loanusers collection...');
-                console.log('User data structure:', userData);
+                console.log('💾 Preparing to save user data to Firebase...');
+                console.log('📊 User Data Preview:');
+                console.log('- Name:', userData.name);
+                console.log('- Mobile:', userData.mobile);
+                console.log('- Email:', userData.email);
+                console.log('- UID:', userData.uid);
+                console.log('- Profile Complete:', userData.profileComplete + '%');
                 
-                console.log('💾 Attempting to save user data to Firebase...');
-                console.log('📋 User data structure:', JSON.stringify(userData, null, 2));
+                console.log('💾 Attempting to save user data to Firebase loanusers collection...');
                 
                 try {
-                    // First attempt to save to loanusers collection
-                    console.log('💾 Saving to loanusers collection...');
-                    await setDoc(doc(db, 'loanusers', user.uid), userData, { merge: false });
-                    console.log('✅ User data saved successfully to loanusers collection');
+                    // Save to loanusers collection - MAIN DATA STORAGE
+                    console.log('🔥 Saving to Firebase: loanusers/' + user.uid);
+                    await setDoc(doc(db, 'loanusers', user.uid), userData);
+                    console.log('✅ SUCCESS: User data saved to loanusers collection');
                     
                     // Verify the data was saved by reading it back
                     console.log('🔍 Verifying saved data...');
@@ -3812,42 +3677,23 @@
                 registerForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
-                    // Collect all form data
-                    const formData = {
-                        name: document.getElementById('reg-name').value.trim(),
-                        mobile: document.getElementById('reg-mobile').value.trim(),
-                        email: document.getElementById('reg-email').value.trim(),
-                        dateOfBirth: document.getElementById('reg-dob').value,
-                        gender: document.getElementById('reg-gender').value,
-                        occupation: document.getElementById('reg-occupation').value,
-                        monthlyIncome: document.getElementById('reg-monthly-income').value,
-                        city: document.getElementById('reg-city').value.trim(),
-                        state: document.getElementById('reg-state').value,
-                        pincode: document.getElementById('reg-pincode').value.trim(),
-                        referralCode: document.getElementById('reg-referral').value.trim(),
-                        password: document.getElementById('reg-password').value,
-                        confirmPassword: document.getElementById('reg-confirm-password').value,
-                        acceptTerms: document.getElementById('reg-terms').checked
-                    };
+                    // Collect form data (simple form)
+                    const name = document.getElementById('reg-name').value.trim();
+                    const mobile = document.getElementById('reg-mobile').value.trim();
+                    const password = document.getElementById('reg-password').value;
+                    const confirmPassword = document.getElementById('reg-confirm-password').value;
                     
                     console.log('Registration form submitted with data:', { 
-                        ...formData, 
-                        password: formData.password ? '***' : 'empty',
-                        confirmPassword: formData.confirmPassword ? '***' : 'empty'
+                        name, mobile, password: password ? '***' : 'empty'
                     });
                     
                     // Validate required fields
-                    if (!formData.name || !formData.mobile || !formData.password || !formData.confirmPassword) {
+                    if (!name || !mobile || !password || !confirmPassword) {
                         window.showMessage('Please fill all required fields', 'error');
                         return;
                     }
                     
-                    if (!formData.acceptTerms) {
-                        window.showMessage('Please accept the Terms & Conditions to continue', 'error');
-                        return;
-                    }
-                    
-                    if (formData.password !== formData.confirmPassword) {
+                    if (password !== confirmPassword) {
                         window.showMessage('Passwords do not match', 'error');
                         return;
                     }
@@ -3862,13 +3708,10 @@
                     
                     try {
                         console.log('🚀 Starting registration process...');
-                        console.log('📱 Mobile:', formData.mobile);
-                        console.log('👤 Name:', formData.name);
-                        console.log('🏙️ Location:', formData.city, formData.state);
-                        console.log('💼 Occupation:', formData.occupation);
-                        console.log('🎂 Age calculation from DOB:', formData.dateOfBirth);
+                        console.log('📱 Mobile:', mobile);
+                        console.log('👤 Name:', name);
                         
-                        const success = await window.registerUser(formData);
+                        const success = await window.registerUser(name, mobile, password);
                         
                         if (success) {
                             console.log('✅ Registration successful, clearing form');
