@@ -1315,9 +1315,11 @@
         };
 
         // Initialize Firebase
+        console.log('Initializing Firebase...');
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        console.log('Firebase initialized successfully');
 
         // Global variables
         let currentUser = null;
@@ -1414,9 +1416,11 @@
         // Authentication functions
         window.registerUser = async function(name, mobile, password) {
             try {
+                console.log('Starting registration for:', mobile);
                 // Create user account using mobile as email (mobile@quickcash.app)
                 const email = `${mobile}@quickcash.app`;
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log('User created successfully:', userCredential.user.uid);
                 const user = userCredential.user;
 
                 // Create comprehensive user data matching the exact structure from example
@@ -1614,7 +1618,9 @@
                 };
 
                 // Save to loanusers collection with UID as document ID
+                console.log('Saving user data to Firebase...');
                 await setDoc(doc(db, 'loanusers', user.uid), userData);
+                console.log('User data saved successfully');
 
                 showMessage('Registration successful! Please complete your profile.', 'success');
                 return true;
@@ -1627,8 +1633,10 @@
 
         window.loginUser = async function(mobile, password) {
             try {
+                console.log('Starting login for:', mobile);
                 const email = `${mobile}@quickcash.app`;
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('Login successful for:', userCredential.user.uid);
                 
                 // Update last login time and session info
                 if (userCredential.user) {
@@ -1880,6 +1888,16 @@
         // Make functions globally available
         window.loadUserData = loadUserData;
         window.updateUserDisplay = updateUserDisplay;
+        window.applyForLoan = applyForLoan;
+        window.updateUserProfile = updateUserProfile;
+        
+        // Signal that Firebase is ready
+        window.firebaseReady = true;
+        console.log('Firebase functions exposed to window:', {
+            loginUser: typeof window.loginUser,
+            registerUser: typeof window.registerUser,
+            showMessage: typeof window.showMessage
+        });
     </script>
 
     <script>
@@ -1911,62 +1929,108 @@
             }
         }
 
-        // Form submissions
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const mobile = document.getElementById('login-mobile').value;
-            const password = document.getElementById('login-password').value;
-            
-            const submitBtn = this.querySelector('.btn-primary');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const loading = submitBtn.querySelector('.loading');
-            
-            btnText.style.display = 'none';
-            loading.style.display = 'inline-block';
-            submitBtn.disabled = true;
-            
-            const success = await loginUser(mobile, password);
-            
-            btnText.style.display = 'inline';
-            loading.style.display = 'none';
-            submitBtn.disabled = false;
-            
-            if (success) {
-                this.reset();
-            }
-        });
-
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const mobile = document.getElementById('reg-mobile').value;
-            const password = document.getElementById('reg-password').value;
-            const confirmPassword = document.getElementById('reg-confirm-password').value;
-            
-            if (password !== confirmPassword) {
-                showMessage('Passwords do not match', 'error');
+        // Form submissions - Wait for DOM and Firebase to be ready
+        function initializeFormHandlers() {
+            if (!window.firebaseReady) {
+                setTimeout(initializeFormHandlers, 100);
                 return;
             }
-            
-            const submitBtn = this.querySelector('.btn-primary');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const loading = submitBtn.querySelector('.loading');
-            
-            btnText.style.display = 'none';
-            loading.style.display = 'inline-block';
-            submitBtn.disabled = true;
-            
-            const success = await registerUser(name, mobile, password);
-            
-            btnText.style.display = 'inline';
-            loading.style.display = 'none';
-            submitBtn.disabled = false;
-            
-            if (success) {
-                this.reset();
-                switchTab('login');
+            // Login form submission
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const mobile = document.getElementById('login-mobile').value;
+                    const password = document.getElementById('login-password').value;
+                    
+                    console.log('Login form submitted with:', { mobile, password: password ? '***' : 'empty' });
+                    
+                    if (!mobile || !password) {
+                        window.showMessage('Please fill all fields', 'error');
+                        return;
+                    }
+                    
+                    const submitBtn = this.querySelector('.btn-primary');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const loading = submitBtn.querySelector('.loading');
+                    
+                    btnText.style.display = 'none';
+                    loading.style.display = 'inline-block';
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        const success = await window.loginUser(mobile, password);
+                        
+                        if (success) {
+                            this.reset();
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        window.showMessage('Login failed. Please try again.', 'error');
+                    } finally {
+                        btnText.style.display = 'inline';
+                        loading.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                });
             }
-        });
+
+            // Registration form submission
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const name = document.getElementById('reg-name').value;
+                    const mobile = document.getElementById('reg-mobile').value;
+                    const password = document.getElementById('reg-password').value;
+                    const confirmPassword = document.getElementById('reg-confirm-password').value;
+                    
+                    console.log('Registration form submitted with:', { name, mobile, password: password ? '***' : 'empty' });
+                    
+                    if (!name || !mobile || !password || !confirmPassword) {
+                        window.showMessage('Please fill all fields', 'error');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        window.showMessage('Passwords do not match', 'error');
+                        return;
+                    }
+                    
+                    const submitBtn = this.querySelector('.btn-primary');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const loading = submitBtn.querySelector('.loading');
+                    
+                    btnText.style.display = 'none';
+                    loading.style.display = 'inline-block';
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        const success = await window.registerUser(name, mobile, password);
+                        
+                        if (success) {
+                            this.reset();
+                            switchTab('login');
+                        }
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        window.showMessage('Registration failed. Please try again.', 'error');
+                    } finally {
+                        btnText.style.display = 'inline';
+                        loading.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeFormHandlers);
+        } else {
+            // DOM is already ready
+            initializeFormHandlers();
+        }
 
         // Quick actions toggle
         const toggleBtn = document.getElementById('toggleActions');
