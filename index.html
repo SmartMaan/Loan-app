@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Cash - Complete App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+    
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --secondary: #4a42e8;
+            --accent: #ff6584;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .page {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Authentication Page Styles */
+        .auth-page {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #4a6cf7;
+            border-bottom: 2px solid #4a6cf7;
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: slideIn 0.3s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #4a6cf7;
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+            outline: none;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3a5ce4, #7a2ffa);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+        }
+        
+        .error {
+            color: #ff4757;
+            background-color: rgba(255, 71, 87, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 0 20px 20px;
+            text-align: center;
+            font-size: 14px;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .success {
+            color: #28a745;
+            background-color: rgba(40, 167, 69, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 0 20px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        /* Home Page Styles */
+        .home-page {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            padding-bottom: 80px;
+        }
+        
+        .home-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .home-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .home-logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .profile-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .welcome-banner h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .welcome-banner p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .mobile-features-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #ffffff;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            gap: 10px;
+        }
+
+        .feature-card {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 120px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+            white-space: normal;
+        }
+
+        .feature-desc {
+            font-size: 12px;
+            color: #718096;
+            white-space: normal;
+        }
+
+        .mobile-features-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .amazon-note {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .loan-banner {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 20px 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loan-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .loan-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .loan-details {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .loan-detail {
+            flex: 1;
+            min-width: 30%;
+            margin-bottom: 10px;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .apply-btn {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .apply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quick-actions {
+            margin: 20px;
+        }
+        
+        .quick-actions-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .toggle-btn i {
+            transition: transform 0.3s;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        .actions-grid.collapsed {
+            height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .action-btn {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .action-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        /* Profile Page Styles */
+        .profile-page {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 15px;
+        }
+        
+        .user-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .user-mobile {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #eee;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .menu-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f8f9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: #4a6cf7;
+            font-size: 20px;
+        }
+        
+        .menu-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .logout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #e84118, #ff4757);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .popup-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        
+        .popup-overlay.active .popup-content {
+            transform: translateY(0);
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .popup-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4a6cf7;
+        }
+        
+        .popup-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .popup-body {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .popup-body h3 {
+            margin: 15px 0 10px;
+            color: #333;
+        }
+        
+        .popup-body p {
+            margin-bottom: 10px;
+        }
+        
+        .popup-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .popup-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .popup-btn:hover {
+            background: linear-gradient(135deg, #3a5ce4, #7a2ffa);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+        }
+        
+        .contact-option {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .contact-option:hover {
+            background: #eef1ff;
+            transform: translateX(5px);
+        }
+        
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4a6cf7;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        .contact-text {
+            flex: 1;
+        }
+        
+        .contact-label {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .contact-value {
+            font-size: 13px;
+            color: #666;
+            word-break: break-all;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Page -->
+    <div id="auth-page" class="page auth-page active">
+        <div class="container">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-money-bill-wave"></i> Quick Cash
+                </div>
+                <p>Get instant loans with minimal documentation</p>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('login')">Login</div>
+                <div class="tab" onclick="switchTab('register')">Register</div>
+            </div>
+            
+            <!-- Display error/success messages -->
+            <div id="auth-message" style="display: none;"></div>
+                    
+            <!-- Login Form -->
+            <div id="login-form" class="tab-content active">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="login-mobile">Mobile Number</label>
+                        <input type="text" id="login-mobile" name="mobile" class="form-control" placeholder="Enter registered mobile number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="login-password" name="password" class="form-control" placeholder="Enter your password" required>
+                            <i class="toggle-password fas fa-eye" onclick="togglePassword('login-password', this)"></i>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Login</span>
+                        <span class="loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="register-form" class="tab-content">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" name="name" class="form-control" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-mobile">Mobile Number</label>
+                        <input type="text" id="reg-mobile" name="mobile" class="form-control" placeholder="Enter mobile number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-password">Password (min 6 characters)</label>
+                        <div class="password-container">
+                            <input type="password" id="reg-password" name="password" class="form-control" placeholder="Create password" minlength="6" required>
+                            <i class="toggle-password fas fa-eye" onclick="togglePassword('reg-password', this)"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-confirm-password">Confirm Password</label>
+                        <div class="password-container">
+                            <input type="password" id="reg-confirm-password" name="confirm_password" class="form-control" placeholder="Confirm password" minlength="6" required>
+                            <i class="toggle-password fas fa-eye" onclick="togglePassword('reg-confirm-password', this)"></i>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Register</span>
+                        <span class="loading" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="home-page" class="page home-page">
+        <div class="home-header">
+            <div class="home-logo">
+                <i class="fas fa-money-bill-wave"></i> QuickCash
+            </div>
+            <button class="profile-btn" onclick="showPage('profile')">
+                <i class="fas fa-user"></i>
+            </button>
+        </div>
+        
+        <div class="welcome-banner slide-in">
+            <h1 id="welcome-user">Welcome!</h1>
+            <p>We're here to help you with your financial needs</p>
+        </div>
+        
+        <div class="mobile-features-container">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <div class="feature-title">Fast Approval</div>
+                <div class="feature-desc">Within Minutes</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="feature-title">Instant Loan</div>
+                <div class="feature-desc">Direct to Account</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="feature-title">Secure Process</div>
+                <div class="feature-desc">256-bit Encryption</div>
+            </div>
+        </div>
+
+        <div class="amazon-note">
+            <i class="fab fa-amazon" style="color: #FF9900;"></i> Trusted by amazon - Safe & Secure - 24/7 support
+        </div>
+        
+        <div class="loan-banner slide-in">
+            <div class="loan-title">Fast And Secure Loan</div>
+            <div class="loan-amount">₹500,000</div>
+            <div class="loan-details">
+                <div class="loan-detail">
+                    <div class="detail-value">3 Years</div>
+                    <div class="detail-label">Tenure</div>
+                </div>
+                <div class="loan-detail">
+                    <div class="detail-value">0.05%</div>
+                    <div class="detail-label">Interest Rate</div>
+                </div>
+                <div class="loan-detail">
+                    <div class="detail-value">Fast</div>
+                    <div class="detail-label">Approval</div>
+                </div>
+            </div>
+            <button class="apply-btn" onclick="applyForLoan()">Apply Now</button>
+        </div>
+        
+        <div class="quick-actions">
+            <div class="quick-actions-title">
+                Quick Actions
+                <button class="toggle-btn" id="toggleActions">
+                    <span id="toggleText">Hide</span>
+                    <i class="fas fa-chevron-up" id="toggleIcon"></i>
+                </button>
+            </div>
+            
+            <div class="actions-grid" id="actionsGrid">
+                <button class="action-btn" onclick="showPage('profile')">
+                    <div class="action-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="action-label">Profile</div>
+                </button>
+                
+                <button class="action-btn" onclick="showMyLoans()">
+                    <div class="action-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="action-label">My Loans</div>
+                </button>
+                
+                <button class="action-btn" onclick="showHistory()">
+                    <div class="action-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="action-label">History</div>
+                </button>
+                
+                <button class="action-btn" onclick="showRepay()">
+                    <div class="action-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="action-label">Repay</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="showPage('home')">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="showRepay()">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>Repay</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile-page" class="page profile-page">
+        <div class="profile-header">
+            <button class="back-btn" onclick="showPage('home')">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="logo">
+                <i class="fas fa-money-bill-wave"></i> Quick Cash
+            </div>
+            <button class="profile-btn" onclick="showPage('profile')">
+                <i class="fas fa-user"></i>
+            </button>
+        </div>
+        
+        <div class="main-content">
+            <div class="profile-card">
+                <div class="user-avatar" id="user-avatar">
+                    U
+                </div>
+                <h2 class="user-name" id="profile-user-name">User</h2>
+                <div class="user-mobile" id="profile-user-mobile">+91 0000000000</div>
+            </div>
+            
+            <div class="menu-container">
+                <div class="menu-item" onclick="showSettings()">
+                    <div class="menu-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="menu-text">Settings</div>
+                </div>
+                
+                <div class="menu-item" onclick="showInfo()">
+                    <div class="menu-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="menu-text">Information</div>
+                </div>
+                
+                <div class="menu-item" onclick="showMyLoans()">
+                    <div class="menu-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="menu-text">My Loans</div>
+                </div>
+                
+                <div class="menu-item" onclick="showHistory()">
+                    <div class="menu-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="menu-text">Transaction History</div>
+                </div>
+                
+                <div class="menu-item" onclick="showContactPopup()">
+                    <div class="menu-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="menu-text">Contact Us</div>
+                </div>
+                
+                <div class="menu-item" onclick="showPrivacyPopup()">
+                    <div class="menu-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="menu-text">Privacy Policy</div>
+                </div>
+                
+                <div class="menu-item" onclick="showTermsPopup()">
+                    <div class="menu-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="menu-text">Terms & Conditions</div>
+                </div>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+        
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="showPage('home')">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="showRepay()">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>Repay</span>
+            </div>
+            <div class="nav-item" onclick="showHistory()">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </div>
+            <div class="nav-item active" onclick="showPage('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Popup -->
+    <div class="popup-overlay" id="termsPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">Terms & Conditions</h3>
+                <button class="popup-close" onclick="hideTermsPopup()">&times;</button>
+            </div>
+            <div class="popup-body">
+                <h3>1. Loan Agreement</h3>
+                <p>By applying for a loan through Quick Cash, you agree to be bound by these terms and conditions. The loan is subject to approval based on our assessment of your application.</p>
+                
+                <h3>2. Interest Rates</h3>
+                <p>Interest rates vary based on loan amount, tenure, and applicant's creditworthiness. The exact rate will be disclosed in your loan approval.</p>
+                
+                <h3>3. Repayment</h3>
+                <p>You agree to repay the loan amount plus interest by the due date. Late payments may incur additional charges.</p>
+                
+                <h3>4. Privacy</h3>
+                <p>We collect and use your personal information as described in our Privacy Policy to process your application and provide services.</p>
+                
+                <h3>5. Default</h3>
+                <p>Failure to repay may result in additional charges, legal action, and reporting to credit bureaus.</p>
+                
+                <h3>6. Changes to Terms</h3>
+                <p>Quick Cash reserves the right to modify these terms at any time. Continued use of services constitutes acceptance of changes.</p>
+            </div>
+            <div class="popup-footer">
+                <button class="popup-btn" onclick="hideTermsPopup()">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Popup -->
+    <div class="popup-overlay" id="privacyPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">Privacy Policy</h3>
+                <button class="popup-close" onclick="hidePrivacyPopup()">&times;</button>
+            </div>
+            <div class="popup-body">
+                <h3>1. Information Collection</h3>
+                <p>We collect personal information including name, contact details, and financial information to process your loan application and provide services.</p>
+                
+                <h3>2. Use of Information</h3>
+                <p>Your information is used to verify identity, assess creditworthiness, process transactions, and communicate with you about your account.</p>
+                
+                <h3>3. Data Protection</h3>
+                <p>We implement security measures to protect your data from unauthorized access, alteration, or disclosure.</p>
+                
+                <h3>4. Information Sharing</h3>
+                <p>We may share information with credit bureaus, regulatory authorities, and service providers as required by law or for service delivery.</p>
+                
+                <h3>5. Your Rights</h3>
+                <p>You may request access to, correction of, or deletion of your personal data, subject to legal limitations.</p>
+                
+                <h3>6. Changes to Policy</h3>
+                <p>We may update this policy periodically. Continued use of our services constitutes acceptance of the updated policy.</p>
+            </div>
+            <div class="popup-footer">
+                <button class="popup-btn" onclick="hidePrivacyPopup()">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Us Popup -->
+    <div class="popup-overlay" id="contactPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">Contact Us</h3>
+                <button class="popup-close" onclick="hideContactPopup()">&times;</button>
+            </div>
+            <div class="popup-body">
+                <p>For any queries or support, please contact us through any of the following methods:</p>
+                
+                <div class="contact-option" onclick="copyToClipboard('support@quickcash.com')">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-text">
+                        <div class="contact-label">Email Us</div>
+                        <div class="contact-value">support@quickcash.com</div>
+                    </div>
+                </div>
+                
+                <div class="contact-option" onclick="copyToClipboard('+919876543210')">
+                    <div class="contact-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div class="contact-text">
+                        <div class="contact-label">WhatsApp</div>
+                        <div class="contact-value">+91 98765 43210</div>
+                    </div>
+                </div>
+                
+                <div class="contact-option" onclick="copyToClipboard('@quickcashsupport')">
+                    <div class="contact-icon">
+                        <i class="fab fa-telegram"></i>
+                    </div>
+                    <div class="contact-text">
+                        <div class="contact-label">Telegram</div>
+                        <div class="contact-value">@quickcashsupport</div>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 20px; font-size: 13px; color: #666;">Click on any contact method to copy it</p>
+            </div>
+            <div class="popup-footer">
+                <button class="popup-btn" onclick="hideContactPopup()">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase Configuration
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
+            authDomain: "aviator-pr01.firebaseapp.com",
+            databaseURL: "https://aviator-pr01-default-rtdb.firebaseio.com",
+            projectId: "aviator-pr01",
+            storageBucket: "aviator-pr01.firebasestorage.app",
+            messagingSenderId: "290788041297",
+            appId: "1:290788041297:web:168f99d1532997fb778e70",
+            measurementId: "G-ENCBTT4BL8"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global variables
+        let currentUser = null;
+        let userLoans = [];
+
+        // Check authentication state
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                showPage('home');
+            } else {
+                currentUser = null;
+                showPage('auth');
+            }
+        });
+
+        // Load user data from Firestore
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    updateUserDisplay(userData);
+                }
+                
+                // Load user loans
+                const loansQuery = query(collection(db, 'loans'), where('userId', '==', currentUser.uid));
+                const loansSnapshot = await getDocs(loansQuery);
+                userLoans = loansSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Update user display elements
+        function updateUserDisplay(userData) {
+            const userName = userData.name || 'User';
+            const userMobile = userData.mobile || '+91 0000000000';
+            
+            document.getElementById('welcome-user').textContent = `Welcome, ${userName}!`;
+            document.getElementById('profile-user-name').textContent = userName;
+            document.getElementById('profile-user-mobile').textContent = userMobile;
+            document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+        }
+
+        // Authentication functions
+        window.registerUser = async function(name, mobile, password) {
+            try {
+                // Create user account using mobile as email (mobile@quickcash.app)
+                const email = `${mobile}@quickcash.app`;
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Save user data to Firestore
+                await setDoc(doc(db, 'users', user.uid), {
+                    name: name,
+                    mobile: mobile,
+                    email: email,
+                    createdAt: new Date(),
+                    status: 'active'
+                });
+
+                showMessage('Registration successful!', 'success');
+                return true;
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage(getErrorMessage(error.code), 'error');
+                return false;
+            }
+        };
+
+        window.loginUser = async function(mobile, password) {
+            try {
+                const email = `${mobile}@quickcash.app`;
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage('Login successful!', 'success');
+                return true;
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(getErrorMessage(error.code), 'error');
+                return false;
+            }
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                showMessage('Logged out successfully!', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMessage('Error logging out. Please try again.', 'error');
+            }
+        };
+
+        // Loan application function
+        window.applyForLoan = async function() {
+            if (!currentUser) {
+                showMessage('Please login to apply for a loan', 'error');
+                return;
+            }
+
+            try {
+                const loanData = {
+                    userId: currentUser.uid,
+                    amount: 500000,
+                    tenure: '3 Years',
+                    interestRate: '0.05%',
+                    status: 'processing',
+                    appliedAt: new Date(),
+                    repaymentDate: new Date(Date.now() + (3 * 365 * 24 * 60 * 60 * 1000)) // 3 years from now
+                };
+
+                await addDoc(collection(db, 'loans'), loanData);
+                showMessage('Loan application submitted successfully!', 'success');
+                
+                // Reload user loans
+                await loadUserData();
+            } catch (error) {
+                console.error('Loan application error:', error);
+                showMessage('Error submitting loan application. Please try again.', 'error');
+            }
+        };
+
+        // Utility functions
+        function getErrorMessage(errorCode) {
+            const errorMessages = {
+                'auth/email-already-in-use': 'Mobile number already registered',
+                'auth/weak-password': 'Password should be at least 6 characters',
+                'auth/user-not-found': 'No account found with this mobile number',
+                'auth/wrong-password': 'Incorrect password',
+                'auth/invalid-email': 'Invalid mobile number format',
+                'auth/network-request-failed': 'Network error. Please check your connection',
+                'auth/too-many-requests': 'Too many failed attempts. Please try again later'
+            };
+            return errorMessages[errorCode] || 'An error occurred. Please try again.';
+        }
+
+        window.showMessage = function(message, type) {
+            const messageDiv = document.getElementById('auth-message');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        };
+
+        // Page navigation
+        window.showPage = function(pageName) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            const targetPage = document.getElementById(pageName + '-page');
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Update bottom navigation
+            updateBottomNav(pageName);
+        };
+
+        function updateBottomNav(activePage) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            if (activePage === 'home') {
+                document.querySelector('.nav-item[onclick="showPage(\'home\')"]')?.classList.add('active');
+            } else if (activePage === 'profile') {
+                document.querySelector('.nav-item[onclick="showPage(\'profile\')"]')?.classList.add('active');
+            }
+        }
+
+        // Placeholder functions for other features
+        window.showMyLoans = function() {
+            alert('My Loans feature coming soon!');
+        };
+
+        window.showHistory = function() {
+            alert('Transaction History feature coming soon!');
+        };
+
+        window.showRepay = function() {
+            alert('Repay feature coming soon!');
+        };
+
+        window.showSettings = function() {
+            alert('Settings feature coming soon!');
+        };
+
+        window.showInfo = function() {
+            alert('Information feature coming soon!');
+        };
+
+        // Make functions globally available
+        window.loadUserData = loadUserData;
+        window.updateUserDisplay = updateUserDisplay;
+    </script>
+
+    <script>
+        // Tab switching for authentication
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + '-form').classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Password toggle
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Form submissions
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const mobile = document.getElementById('login-mobile').value;
+            const password = document.getElementById('login-password').value;
+            
+            const submitBtn = this.querySelector('.btn-primary');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const loading = submitBtn.querySelector('.loading');
+            
+            btnText.style.display = 'none';
+            loading.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            const success = await loginUser(mobile, password);
+            
+            btnText.style.display = 'inline';
+            loading.style.display = 'none';
+            submitBtn.disabled = false;
+            
+            if (success) {
+                this.reset();
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const mobile = document.getElementById('reg-mobile').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
+            const submitBtn = this.querySelector('.btn-primary');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const loading = submitBtn.querySelector('.loading');
+            
+            btnText.style.display = 'none';
+            loading.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            const success = await registerUser(name, mobile, password);
+            
+            btnText.style.display = 'inline';
+            loading.style.display = 'none';
+            submitBtn.disabled = false;
+            
+            if (success) {
+                this.reset();
+                switchTab('login');
+            }
+        });
+
+        // Quick actions toggle
+        const toggleBtn = document.getElementById('toggleActions');
+        const actionsGrid = document.getElementById('actionsGrid');
+        const toggleText = document.getElementById('toggleText');
+        const toggleIcon = document.getElementById('toggleIcon');
+        let isCollapsed = false;
+        
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                isCollapsed = !isCollapsed;
+                
+                if (isCollapsed) {
+                    actionsGrid.classList.add('collapsed');
+                    toggleText.textContent = 'Show';
+                    toggleIcon.classList.remove('fa-chevron-up');
+                    toggleIcon.classList.add('fa-chevron-down');
+                } else {
+                    actionsGrid.classList.remove('collapsed');
+                    toggleText.textContent = 'Hide';
+                    toggleIcon.classList.remove('fa-chevron-down');
+                    toggleIcon.classList.add('fa-chevron-up');
+                }
+            });
+        }
+
+        // Popup functions
+        function showTermsPopup() {
+            document.getElementById('termsPopup').classList.add('active');
+        }
+        
+        function hideTermsPopup() {
+            document.getElementById('termsPopup').classList.remove('active');
+        }
+        
+        function showPrivacyPopup() {
+            document.getElementById('privacyPopup').classList.add('active');
+        }
+
+        function hidePrivacyPopup() {
+            document.getElementById('privacyPopup').classList.remove('active');
+        }
+
+        function showContactPopup() {
+            document.getElementById('contactPopup').classList.add('active');
+        }
+
+        function hideContactPopup() {
+            document.getElementById('contactPopup').classList.remove('active');
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                let displayText = text;
+                if (text.includes('@') && !text.startsWith('@')) {
+                    displayText = text.split('@')[0] + '@...';
+                } else if (text.startsWith('+')) {
+                    displayText = text.substring(0, 6) + '...';
+                } else if (text.startsWith('@')) {
+                    displayText = text;
+                }
+                
+                const notification = document.createElement('div');
+                notification.style.position = 'fixed';
+                notification.style.bottom = '20px';
+                notification.style.left = '50%';
+                notification.style.transform = 'translateX(-50%)';
+                notification.style.backgroundColor = '#4a6cf7';
+                notification.style.color = 'white';
+                notification.style.padding = '10px 20px';
+                notification.style.borderRadius = '5px';
+                notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                notification.style.zIndex = '10000';
+                notification.textContent = `Copied: ${displayText}`;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        // Close popups when clicking outside
+        document.getElementById('termsPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideTermsPopup();
+            }
+        });
+
+        document.getElementById('privacyPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hidePrivacyPopup();
+            }
+        });
+
+        document.getElementById('contactPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideContactPopup();
+            }
+        });
+    </script>
+</body>
+</html>
