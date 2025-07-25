@@ -1327,16 +1327,16 @@
 
         // Check authentication state
         onAuthStateChanged(auth, async (user) => {
+            console.log('Auth state changed:', user ? user.uid : 'logged out');
             if (user) {
                 currentUser = user;
+                console.log('Loading user data for:', user.uid);
                 await loadUserData();
-                // Only show home page if we're currently on auth page
-                const currentPage = document.querySelector('.page.active').id;
-                if (currentPage === 'auth-page') {
-                    showPage('home');
-                }
+                console.log('Redirecting to home page');
+                showPage('home');
             } else {
                 currentUser = null;
+                console.log('User not logged in, showing auth page');
                 showPage('auth');
             }
         });
@@ -1366,21 +1366,40 @@
 
         // Update user display elements
         function updateUserDisplay(userData) {
+            console.log('Updating user display with data:', userData);
             const userName = userData.name || userData.personalDetails?.fullName || 'User';
             const userMobile = userData.mobile || userData.phone || '+91 0000000000';
             const userRole = userData.role || 'user';
             const kycStatus = userData.kycDocuments?.status || 'pending';
             
-            document.getElementById('welcome-user').textContent = `Welcome, ${userName}!`;
-            document.getElementById('profile-user-name').textContent = userName;
-            document.getElementById('profile-user-mobile').textContent = userMobile;
-            document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+            // Update welcome message
+            const welcomeElement = document.getElementById('welcome-user');
+            if (welcomeElement) {
+                welcomeElement.textContent = `Welcome, ${userName}!`;
+            }
+            
+            // Update profile elements
+            const profileNameElement = document.getElementById('profile-user-name');
+            if (profileNameElement) {
+                profileNameElement.textContent = userName;
+            }
+            
+            const profileMobileElement = document.getElementById('profile-user-mobile');
+            if (profileMobileElement) {
+                profileMobileElement.textContent = userMobile;
+            }
+            
+            const avatarElement = document.getElementById('user-avatar');
+            if (avatarElement) {
+                avatarElement.textContent = userName.charAt(0).toUpperCase();
+            }
             
             // Update KYC status display
             updateKYCStatus(kycStatus);
             
             // Store user data globally for other functions
             window.currentUserData = userData;
+            console.log('User display updated successfully');
         }
 
         // Update KYC status display
@@ -1426,195 +1445,169 @@
                 // Create comprehensive user data matching the exact structure from example
                 const currentTimestamp = Date.now();
                 const userData = {
-                    // Basic Info
-                    uid: user.uid,
-                    name: name,
-                    mobile: mobile,
-                    phone: mobile,
-                    email: email,
-                    password: password, // Note: In production, don't store plain text password
-                    username: `${name.toLowerCase()}_${mobile.substring(0, 4)}`,
-                    
-                    // Account Status
-                    role: "user",
-                    status: "active",
-                    isActive: true,
-                    isVerified: false,
-                    emailVerified: false,
-                    phoneVerified: true,
-                    profileComplete: 30,
+                    // Match the exact structure from the example file
                     accountType: "individual",
-                    
-                    // Personal Details
-                    personalDetails: {
-                        fullName: name,
-                        fatherName: "",
-                        motherName: "",
-                        dateOfBirth: "",
-                        age: 0,
-                        gender: "",
-                        maritalStatus: "",
-                        nationality: "Indian",
-                        religion: "",
-                        category: "",
-                        qualification: "",
-                        occupation: "",
-                        experience: 0
-                    },
-                    
-                    // Contact Information
-                    contactInfo: {
-                        email: email,
-                        primaryPhone: mobile,
-                        secondaryPhone: "",
-                        alternateEmail: "",
-                        whatsapp: mobile,
-                        telegram: ""
-                    },
-                    
-                    // Address Details
                     addressDetails: {
                         currentAddress: {
-                            street: "",
-                            landmark: "",
                             city: "",
                             district: "",
-                            state: "",
+                            landmark: "",
                             pincode: "",
                             residenceType: "",
-                            stayingFrom: ""
+                            state: "",
+                            stayingFrom: "",
+                            street: ""
                         },
                         permanentAddress: {
-                            street: "",
-                            landmark: "",
                             city: "",
                             district: "",
-                            state: "",
+                            landmark: "",
                             pincode: "",
-                            sameAsCurrent: false
+                            sameAsCurrent: false,
+                            state: "",
+                            street: ""
                         }
                     },
-                    
-                    // Employment Details
-                    employmentDetails: {
-                        employmentType: "",
-                        companyName: "",
-                        designation: "",
-                        companyAddress: "",
-                        officePhone: "",
-                        workExperience: 0,
-                        workingYears: 0,
-                        monthlyIncome: 0,
-                        annualIncome: 0,
-                        salaryMode: ""
-                    },
-                    
-                    // Financial Details
-                    financialDetails: {
-                        creditScore: 750,
-                        monthlyEMI: 0,
-                        monthlyExpenses: 0,
-                        bankAccount: {
-                            bankName: "",
-                            accountHolderName: "",
-                            accountNumber: "",
-                            accountType: "",
-                            branchName: "",
-                            ifscCode: ""
-                        }
-                    },
-                    
-                    // KYC Documents
-                    kycDocuments: {
-                        status: "pending",
-                        level: 0,
-                        aadharNumber: "",
-                        panNumber: "",
-                        drivingLicenseNumber: "",
-                        passportNumber: "",
-                        voterIdNumber: "",
-                        documentsUploaded: {
-                            photo: false,
-                            signature: false,
-                            aadharFront: false,
-                            aadharBack: false,
-                            panCard: false,
-                            bankStatement: false,
-                            salarySlip: false
-                        }
-                    },
-                    
-                    // Loan Details
-                    loanDetails: {
-                        totalApplications: 0,
-                        activeLoans: 0,
-                        completedLoans: 0,
-                        approvedLoans: 0,
-                        rejectedLoans: 0,
-                        defaultedLoans: 0,
-                        totalBorrowed: 0,
-                        totalRepaid: 0,
-                        outstandingAmount: 0,
-                        creditLimit: 50000,
-                        eligibleAmount: 25000,
-                        riskCategory: "Medium",
-                        repaymentHistory: "No History"
-                    },
-                    
-                    // Referral Information
-                    referralInfo: {
-                        referralCode: `QC${mobile.substring(0, 4)}${name.substring(0, 2).toUpperCase()}${mobile.substring(6, 8)}`,
-                        totalReferrals: 0,
-                        successfulReferrals: 0,
-                        referralEarnings: 0
-                    },
-                    
-                    // User Preferences
-                    preferences: {
-                        language: "Hindi",
-                        currency: "INR",
-                        communicationMode: "WhatsApp",
-                        repaymentPreference: "Monthly",
-                        notifications: {
-                            push: true,
-                            email: true,
-                            sms: true,
-                            whatsapp: true,
-                            marketing: false
-                        }
-                    },
-                    
-                    // Session Information
-                    sessionInfo: {
-                        isOnline: true,
-                        loginCount: 1,
-                        totalSessions: 1,
-                        lastLoginIP: "",
-                        lastLoginDevice: navigator.userAgent,
-                        deviceInfo: {
-                            platform: navigator.platform,
-                            browser: navigator.userAgent,
-                            language: navigator.language,
-                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                        }
-                    },
-                    
-                    // Admin Notes
                     adminNotes: {
-                        notes: "",
                         internalRating: "Good",
+                        notes: "",
                         specialInstructions: "",
                         supportTickets: 0
                     },
-                    
-                    // Timestamps
+                    contactInfo: {
+                        alternateEmail: "",
+                        email: email,
+                        primaryPhone: mobile,
+                        secondaryPhone: "",
+                        telegram: "",
+                        whatsapp: mobile
+                    },
+                    email: email,
+                    emailVerified: false,
+                    employmentDetails: {
+                        annualIncome: 0,
+                        companyAddress: "",
+                        companyName: "",
+                        designation: "",
+                        employmentType: "",
+                        monthlyIncome: 0,
+                        officePhone: "",
+                        salaryMode: "",
+                        workExperience: 0,
+                        workingYears: 0
+                    },
+                    financialDetails: {
+                        bankAccount: {
+                            accountHolderName: "",
+                            accountNumber: "",
+                            accountType: "",
+                            bankName: "",
+                            branchName: "",
+                            ifscCode: ""
+                        },
+                        creditScore: 750,
+                        monthlyEMI: 0,
+                        monthlyExpenses: 0
+                    },
+                    isActive: true,
+                    isVerified: false,
+                    kycDocuments: {
+                        aadharNumber: "",
+                        documentsUploaded: {
+                            aadharBack: false,
+                            aadharFront: false,
+                            bankStatement: false,
+                            panCard: false,
+                            photo: false,
+                            salarySlip: false,
+                            signature: false
+                        },
+                        drivingLicenseNumber: "",
+                        level: 0,
+                        panNumber: "",
+                        passportNumber: "",
+                        status: "pending",
+                        voterIdNumber: ""
+                    },
+                    loanDetails: {
+                        activeLoans: 0,
+                        approvedLoans: 0,
+                        completedLoans: 0,
+                        creditLimit: 50000,
+                        defaultedLoans: 0,
+                        eligibleAmount: 25000,
+                        outstandingAmount: 0,
+                        rejectedLoans: 0,
+                        repaymentHistory: "No History",
+                        riskCategory: "Medium",
+                        totalApplications: 0,
+                        totalBorrowed: 0,
+                        totalRepaid: 0
+                    },
+                    mobile: mobile,
+                    name: name,
+                    password: password,
+                    personalDetails: {
+                        age: 0,
+                        category: "",
+                        dateOfBirth: "",
+                        experience: 0,
+                        fatherName: "",
+                        fullName: name,
+                        gender: "",
+                        maritalStatus: "",
+                        motherName: "",
+                        nationality: "Indian",
+                        occupation: "",
+                        qualification: "",
+                        religion: ""
+                    },
+                    phone: mobile,
+                    phoneVerified: true,
+                    preferences: {
+                        communicationMode: "WhatsApp",
+                        currency: "INR",
+                        language: "Hindi",
+                        notifications: {
+                            email: true,
+                            marketing: false,
+                            push: true,
+                            sms: true,
+                            whatsapp: true
+                        },
+                        repaymentPreference: "Monthly"
+                    },
+                    profileComplete: 30,
+                    referralInfo: {
+                        referralCode: `QC${mobile.substring(0, 4)}${name.substring(0, 2).toUpperCase()}${mobile.substring(6, 8)}`,
+                        referralEarnings: 0,
+                        successfulReferrals: 0,
+                        totalReferrals: 0
+                    },
+                    role: "user",
+                    sessionInfo: {
+                        deviceInfo: {
+                            browser: navigator.userAgent,
+                            language: navigator.language,
+                            platform: navigator.platform,
+                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                        },
+                        isOnline: true,
+                        lastLoginDevice: navigator.userAgent,
+                        lastLoginIP: "",
+                        loginCount: 1,
+                        totalSessions: 1
+                    },
+                    status: "active",
                     timestamps: {
-                        registeredAt: currentTimestamp,
                         createdAt: currentTimestamp,
-                        lastUpdated: currentTimestamp,
                         lastLogin: currentTimestamp,
-                        profileLastUpdated: currentTimestamp
-                    }
+                        lastUpdated: currentTimestamp,
+                        profileLastUpdated: currentTimestamp,
+                        registeredAt: currentTimestamp
+                    },
+                    uid: user.uid,
+                    username: `${name.toLowerCase()}_${mobile.substring(0, 4)}`
                 };
 
                 // Save to loanusers collection with UID as document ID
@@ -1622,7 +1615,8 @@
                 await setDoc(doc(db, 'loanusers', user.uid), userData);
                 console.log('User data saved successfully');
 
-                showMessage('Registration successful! Please complete your profile.', 'success');
+                showMessage('Registration successful! Redirecting to home page...', 'success');
+                console.log('Registration completed successfully');
                 return true;
             } catch (error) {
                 console.error('Registration error:', error);
@@ -1654,7 +1648,8 @@
                     await setDoc(doc(db, 'loanusers', userCredential.user.uid), updateData, { merge: true });
                 }
                 
-                showMessage('Login successful!', 'success');
+                showMessage('Login successful! Redirecting to home page...', 'success');
+                console.log('Login completed successfully');
                 return true;
             } catch (error) {
                 console.error('Login error:', error);
@@ -1791,12 +1786,19 @@
 
         // Page navigation
         window.showPage = function(pageName) {
+            console.log('Showing page:', pageName);
             const pages = document.querySelectorAll('.page');
-            pages.forEach(page => page.classList.remove('active'));
+            pages.forEach(page => {
+                page.classList.remove('active');
+                console.log('Hiding page:', page.id);
+            });
             
             const targetPage = document.getElementById(pageName + '-page');
             if (targetPage) {
                 targetPage.classList.add('active');
+                console.log('Showing page element:', targetPage.id);
+            } else {
+                console.error('Page not found:', pageName + '-page');
             }
 
             // Update bottom navigation
@@ -1808,10 +1810,13 @@
             navItems.forEach(item => item.classList.remove('active'));
             
             if (activePage === 'home') {
-                document.querySelector('.nav-item[onclick="showPage(\'home\')"]')?.classList.add('active');
+                const homeNavItem = document.querySelector('.nav-item[onclick="showPage(\'home\')"]');
+                if (homeNavItem) homeNavItem.classList.add('active');
             } else if (activePage === 'profile') {
-                document.querySelector('.nav-item[onclick="showPage(\'profile\')"]')?.classList.add('active');
+                const profileNavItem = document.querySelector('.nav-item[onclick="showPage(\'profile\')"]');
+                if (profileNavItem) profileNavItem.classList.add('active');
             }
+            console.log('Bottom nav updated for page:', activePage);
         }
 
         // Placeholder functions for other features
