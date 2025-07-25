@@ -36,6 +36,11 @@
         .page {
             display: none;
             min-height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
         
         .page.active {
@@ -49,6 +54,12 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
         }
         
         .container {
@@ -1290,7 +1301,7 @@
         // Firebase Configuration
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
@@ -1333,7 +1344,7 @@
             if (!currentUser) return;
             
             try {
-                const userDoc = await getDoc(doc(db, 'loanuser', currentUser.uid));
+                const userDoc = await getDoc(doc(db, 'loanusers', currentUser.uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     updateUserDisplay(userData);
@@ -1353,10 +1364,10 @@
 
         // Update user display elements
         function updateUserDisplay(userData) {
-            const userName = userData.name || 'User';
-            const userMobile = userData.mobile || '+91 0000000000';
+            const userName = userData.name || userData.personalDetails?.fullName || 'User';
+            const userMobile = userData.mobile || userData.phone || '+91 0000000000';
             const userRole = userData.role || 'user';
-            const kycStatus = userData.kycStatus || 'pending';
+            const kycStatus = userData.kycDocuments?.status || 'pending';
             
             document.getElementById('welcome-user').textContent = `Welcome, ${userName}!`;
             document.getElementById('profile-user-name').textContent = userName;
@@ -1408,58 +1419,202 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Save comprehensive user data to Firestore under loanuser collection
+                // Create comprehensive user data matching the exact structure from example
+                const currentTimestamp = Date.now();
                 const userData = {
                     // Basic Info
+                    uid: user.uid,
                     name: name,
                     mobile: mobile,
+                    phone: mobile,
                     email: email,
+                    password: password, // Note: In production, don't store plain text password
+                    username: `${name.toLowerCase()}_${mobile.substring(0, 4)}`,
                     
-                    // Account Info
-                    uid: user.uid,
-                    role: 'user', // default role
-                    status: 'active',
+                    // Account Status
+                    role: "user",
+                    status: "active",
+                    isActive: true,
+                    isVerified: false,
+                    emailVerified: false,
+                    phoneVerified: true,
+                    profileComplete: 30,
+                    accountType: "individual",
                     
-                    // KYC Info
-                    kycStatus: 'pending', // pending, processing, verified, rejected
-                    
-                    // Personal Details (to be filled later)
+                    // Personal Details
                     personalDetails: {
                         fullName: name,
-                        fatherName: '',
-                        motherName: '',
-                        dateOfBirth: '',
-                        gender: '',
-                        maritalStatus: '',
-                        address: '',
-                        city: '',
-                        state: '',
-                        pincode: '',
-                        aadharNumber: '',
-                        panNumber: '',
-                        bankAccountNumber: '',
-                        ifscCode: '',
-                        bankName: '',
-                        profession: '',
-                        monthlyIncome: '',
-                        employerName: '',
-                        workExperience: ''
+                        fatherName: "",
+                        motherName: "",
+                        dateOfBirth: "",
+                        age: 0,
+                        gender: "",
+                        maritalStatus: "",
+                        nationality: "Indian",
+                        religion: "",
+                        category: "",
+                        qualification: "",
+                        occupation: "",
+                        experience: 0
+                    },
+                    
+                    // Contact Information
+                    contactInfo: {
+                        email: email,
+                        primaryPhone: mobile,
+                        secondaryPhone: "",
+                        alternateEmail: "",
+                        whatsapp: mobile,
+                        telegram: ""
+                    },
+                    
+                    // Address Details
+                    addressDetails: {
+                        currentAddress: {
+                            street: "",
+                            landmark: "",
+                            city: "",
+                            district: "",
+                            state: "",
+                            pincode: "",
+                            residenceType: "",
+                            stayingFrom: ""
+                        },
+                        permanentAddress: {
+                            street: "",
+                            landmark: "",
+                            city: "",
+                            district: "",
+                            state: "",
+                            pincode: "",
+                            sameAsCurrent: false
+                        }
+                    },
+                    
+                    // Employment Details
+                    employmentDetails: {
+                        employmentType: "",
+                        companyName: "",
+                        designation: "",
+                        companyAddress: "",
+                        officePhone: "",
+                        workExperience: 0,
+                        workingYears: 0,
+                        monthlyIncome: 0,
+                        annualIncome: 0,
+                        salaryMode: ""
+                    },
+                    
+                    // Financial Details
+                    financialDetails: {
+                        creditScore: 750,
+                        monthlyEMI: 0,
+                        monthlyExpenses: 0,
+                        bankAccount: {
+                            bankName: "",
+                            accountHolderName: "",
+                            accountNumber: "",
+                            accountType: "",
+                            branchName: "",
+                            ifscCode: ""
+                        }
+                    },
+                    
+                    // KYC Documents
+                    kycDocuments: {
+                        status: "pending",
+                        level: 0,
+                        aadharNumber: "",
+                        panNumber: "",
+                        drivingLicenseNumber: "",
+                        passportNumber: "",
+                        voterIdNumber: "",
+                        documentsUploaded: {
+                            photo: false,
+                            signature: false,
+                            aadharFront: false,
+                            aadharBack: false,
+                            panCard: false,
+                            bankStatement: false,
+                            salarySlip: false
+                        }
+                    },
+                    
+                    // Loan Details
+                    loanDetails: {
+                        totalApplications: 0,
+                        activeLoans: 0,
+                        completedLoans: 0,
+                        approvedLoans: 0,
+                        rejectedLoans: 0,
+                        defaultedLoans: 0,
+                        totalBorrowed: 0,
+                        totalRepaid: 0,
+                        outstandingAmount: 0,
+                        creditLimit: 50000,
+                        eligibleAmount: 25000,
+                        riskCategory: "Medium",
+                        repaymentHistory: "No History"
+                    },
+                    
+                    // Referral Information
+                    referralInfo: {
+                        referralCode: `QC${mobile.substring(0, 4)}${name.substring(0, 2).toUpperCase()}${mobile.substring(6, 8)}`,
+                        totalReferrals: 0,
+                        successfulReferrals: 0,
+                        referralEarnings: 0
+                    },
+                    
+                    // User Preferences
+                    preferences: {
+                        language: "Hindi",
+                        currency: "INR",
+                        communicationMode: "WhatsApp",
+                        repaymentPreference: "Monthly",
+                        notifications: {
+                            push: true,
+                            email: true,
+                            sms: true,
+                            whatsapp: true,
+                            marketing: false
+                        }
+                    },
+                    
+                    // Session Information
+                    sessionInfo: {
+                        isOnline: true,
+                        loginCount: 1,
+                        totalSessions: 1,
+                        lastLoginIP: "",
+                        lastLoginDevice: navigator.userAgent,
+                        deviceInfo: {
+                            platform: navigator.platform,
+                            browser: navigator.userAgent,
+                            language: navigator.language,
+                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                        }
+                    },
+                    
+                    // Admin Notes
+                    adminNotes: {
+                        notes: "",
+                        internalRating: "Good",
+                        specialInstructions: "",
+                        supportTickets: 0
                     },
                     
                     // Timestamps
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    lastLogin: new Date(),
-                    
-                    // App Settings
-                    settings: {
-                        notifications: true,
-                        emailUpdates: true,
-                        smsUpdates: true
+                    timestamps: {
+                        registeredAt: currentTimestamp,
+                        createdAt: currentTimestamp,
+                        lastUpdated: currentTimestamp,
+                        lastLogin: currentTimestamp,
+                        profileLastUpdated: currentTimestamp
                     }
                 };
 
-                await setDoc(doc(db, 'loanuser', user.uid), userData);
+                // Save to loanusers collection with UID as document ID
+                await setDoc(doc(db, 'loanusers', user.uid), userData);
 
                 showMessage('Registration successful! Please complete your profile.', 'success');
                 return true;
@@ -1475,11 +1630,20 @@
                 const email = `${mobile}@quickcash.app`;
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
-                // Update last login time
+                // Update last login time and session info
                 if (userCredential.user) {
-                    await setDoc(doc(db, 'loanuser', userCredential.user.uid), {
-                        lastLogin: new Date()
-                    }, { merge: true });
+                    const updateData = {
+                        'timestamps.lastLogin': Date.now(),
+                        'sessionInfo.isOnline': true,
+                        'sessionInfo.loginCount': increment(1),
+                        'sessionInfo.lastLoginDevice': navigator.userAgent,
+                        'sessionInfo.deviceInfo.browser': navigator.userAgent,
+                        'sessionInfo.deviceInfo.platform': navigator.platform,
+                        'sessionInfo.deviceInfo.language': navigator.language,
+                        'sessionInfo.deviceInfo.timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
+                    };
+                    
+                    await setDoc(doc(db, 'loanusers', userCredential.user.uid), updateData, { merge: true });
                 }
                 
                 showMessage('Login successful!', 'success');
@@ -1553,9 +1717,9 @@
                 const loanRef = await addDoc(collection(db, 'loans'), loanData);
                 
                 // Update user's loan application count
-                await setDoc(doc(db, 'loanuser', currentUser.uid), {
-                    totalLoanApplications: (userData.totalLoanApplications || 0) + 1,
-                    lastLoanApplication: new Date()
+                await setDoc(doc(db, 'loanusers', currentUser.uid), {
+                    'loanDetails.totalApplications': increment(1),
+                    'timestamps.lastUpdated': Date.now()
                 }, { merge: true });
 
                 showMessage('Loan application submitted successfully! We will review it shortly.', 'success');
@@ -1576,9 +1740,10 @@
             }
 
             try {
-                await setDoc(doc(db, 'loanuser', currentUser.uid), {
+                await setDoc(doc(db, 'loanusers', currentUser.uid), {
                     ...profileData,
-                    updatedAt: new Date()
+                    'timestamps.lastUpdated': Date.now(),
+                    'timestamps.profileLastUpdated': Date.now()
                 }, { merge: true });
 
                 showMessage('Profile updated successfully!', 'success');
@@ -1662,15 +1827,19 @@
             if (window.currentUserData) {
                 const userData = window.currentUserData;
                 let infoText = `User Information:\n\n`;
-                infoText += `Name: ${userData.name}\n`;
-                infoText += `Mobile: ${userData.mobile}\n`;
+                infoText += `Name: ${userData.name || userData.personalDetails?.fullName}\n`;
+                infoText += `Mobile: ${userData.mobile || userData.phone}\n`;
+                infoText += `Email: ${userData.email}\n`;
                 infoText += `Role: ${userData.role}\n`;
-                infoText += `KYC Status: ${userData.kycStatus}\n`;
+                infoText += `KYC Status: ${userData.kycDocuments?.status}\n`;
                 infoText += `Account Status: ${userData.status}\n`;
-                infoText += `Member Since: ${userData.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString() : new Date(userData.createdAt).toLocaleDateString()}\n`;
+                infoText += `Profile Complete: ${userData.profileComplete}%\n`;
+                infoText += `Referral Code: ${userData.referralInfo?.referralCode}\n`;
+                infoText += `Credit Limit: ₹${userData.loanDetails?.creditLimit || 0}\n`;
+                infoText += `Member Since: ${new Date(userData.timestamps?.registeredAt || userData.timestamps?.createdAt).toLocaleDateString()}\n`;
                 
-                if (userData.totalLoanApplications) {
-                    infoText += `Total Loan Applications: ${userData.totalLoanApplications}\n`;
+                if (userData.loanDetails?.totalApplications) {
+                    infoText += `Total Loan Applications: ${userData.loanDetails.totalApplications}\n`;
                 }
                 
                 alert(infoText);
@@ -1691,16 +1860,15 @@
             
             if (name && fatherName && address && city && pincode && aadhar && pan) {
                 const profileData = {
-                    personalDetails: {
-                        fullName: name,
-                        fatherName: fatherName,
-                        address: address,
-                        city: city,
-                        pincode: pincode,
-                        aadharNumber: aadhar,
-                        panNumber: pan
-                    },
-                    kycStatus: 'processing' // Update KYC status to processing
+                    'personalDetails.fullName': name,
+                    'personalDetails.fatherName': fatherName,
+                    'addressDetails.currentAddress.street': address,
+                    'addressDetails.currentAddress.city': city,
+                    'addressDetails.currentAddress.pincode': pincode,
+                    'kycDocuments.aadharNumber': aadhar,
+                    'kycDocuments.panNumber': pan,
+                    'kycDocuments.status': 'processing',
+                    'profileComplete': 60
                 };
                 
                 updateUserProfile(profileData);
