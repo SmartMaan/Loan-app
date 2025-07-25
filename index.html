@@ -566,6 +566,42 @@
             margin-bottom: 15px;
         }
         
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f8f9ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .status-badge i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .status-approved {
+            color: #4caf50;
+            background: #e8f5e9;
+        }
+        
+        .status-rejected {
+            color: #f44336;
+            background: #ffebee;
+        }
+        
+        .status-processing {
+            color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        .status-pending {
+            color: #2196F3;
+            background: #e3f2fd;
+        }
+        
         .menu-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1049,6 +1085,10 @@
                 </div>
                 <h2 class="user-name" id="profile-user-name">User</h2>
                 <div class="user-mobile" id="profile-user-mobile">+91 0000000000</div>
+                
+                <div id="kyc-status" class="status-badge status-pending">
+                    <i class="fas fa-shield-alt"></i> KYC Pending
+                </div>
             </div>
             
             <div class="menu-container">
@@ -1064,6 +1104,13 @@
                         <i class="fas fa-info-circle"></i>
                     </div>
                     <div class="menu-text">Information</div>
+                </div>
+                
+                <div class="menu-item" onclick="completeProfile()">
+                    <div class="menu-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div class="menu-text">Complete Profile</div>
                 </div>
                 
                 <div class="menu-item" onclick="showMyLoans()">
@@ -1270,7 +1317,11 @@
             if (user) {
                 currentUser = user;
                 await loadUserData();
-                showPage('home');
+                // Only show home page if we're currently on auth page
+                const currentPage = document.querySelector('.page.active').id;
+                if (currentPage === 'auth-page') {
+                    showPage('home');
+                }
             } else {
                 currentUser = null;
                 showPage('auth');
@@ -1282,10 +1333,13 @@
             if (!currentUser) return;
             
             try {
-                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                const userDoc = await getDoc(doc(db, 'loanuser', currentUser.uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     updateUserDisplay(userData);
+                } else {
+                    // If user document doesn't exist, create basic one
+                    console.log('User document not found, user might need to complete profile');
                 }
                 
                 // Load user loans
@@ -1301,11 +1355,49 @@
         function updateUserDisplay(userData) {
             const userName = userData.name || 'User';
             const userMobile = userData.mobile || '+91 0000000000';
+            const userRole = userData.role || 'user';
+            const kycStatus = userData.kycStatus || 'pending';
             
             document.getElementById('welcome-user').textContent = `Welcome, ${userName}!`;
             document.getElementById('profile-user-name').textContent = userName;
             document.getElementById('profile-user-mobile').textContent = userMobile;
             document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+            
+            // Update KYC status display
+            updateKYCStatus(kycStatus);
+            
+            // Store user data globally for other functions
+            window.currentUserData = userData;
+        }
+
+        // Update KYC status display
+        function updateKYCStatus(status) {
+            const statusElement = document.getElementById('kyc-status');
+            if (statusElement) {
+                let statusText = '';
+                let statusClass = '';
+                
+                switch(status) {
+                    case 'verified':
+                        statusText = 'KYC Verified';
+                        statusClass = 'status-approved';
+                        break;
+                    case 'rejected':
+                        statusText = 'KYC Rejected';
+                        statusClass = 'status-rejected';
+                        break;
+                    case 'processing':
+                        statusText = 'KYC Under Review';
+                        statusClass = 'status-processing';
+                        break;
+                    default:
+                        statusText = 'KYC Pending';
+                        statusClass = 'status-pending';
+                }
+                
+                statusElement.innerHTML = `<i class="fas fa-shield-alt"></i> ${statusText}`;
+                statusElement.className = `status-badge ${statusClass}`;
+            }
         }
 
         // Authentication functions
@@ -1316,16 +1408,60 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Save user data to Firestore
-                await setDoc(doc(db, 'users', user.uid), {
+                // Save comprehensive user data to Firestore under loanuser collection
+                const userData = {
+                    // Basic Info
                     name: name,
                     mobile: mobile,
                     email: email,
+                    
+                    // Account Info
+                    uid: user.uid,
+                    role: 'user', // default role
+                    status: 'active',
+                    
+                    // KYC Info
+                    kycStatus: 'pending', // pending, processing, verified, rejected
+                    
+                    // Personal Details (to be filled later)
+                    personalDetails: {
+                        fullName: name,
+                        fatherName: '',
+                        motherName: '',
+                        dateOfBirth: '',
+                        gender: '',
+                        maritalStatus: '',
+                        address: '',
+                        city: '',
+                        state: '',
+                        pincode: '',
+                        aadharNumber: '',
+                        panNumber: '',
+                        bankAccountNumber: '',
+                        ifscCode: '',
+                        bankName: '',
+                        profession: '',
+                        monthlyIncome: '',
+                        employerName: '',
+                        workExperience: ''
+                    },
+                    
+                    // Timestamps
                     createdAt: new Date(),
-                    status: 'active'
-                });
+                    updatedAt: new Date(),
+                    lastLogin: new Date(),
+                    
+                    // App Settings
+                    settings: {
+                        notifications: true,
+                        emailUpdates: true,
+                        smsUpdates: true
+                    }
+                };
 
-                showMessage('Registration successful!', 'success');
+                await setDoc(doc(db, 'loanuser', user.uid), userData);
+
+                showMessage('Registration successful! Please complete your profile.', 'success');
                 return true;
             } catch (error) {
                 console.error('Registration error:', error);
@@ -1337,7 +1473,15 @@
         window.loginUser = async function(mobile, password) {
             try {
                 const email = `${mobile}@quickcash.app`;
-                await signInWithEmailAndPassword(auth, email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                
+                // Update last login time
+                if (userCredential.user) {
+                    await setDoc(doc(db, 'loanuser', userCredential.user.uid), {
+                        lastLogin: new Date()
+                    }, { merge: true });
+                }
+                
                 showMessage('Login successful!', 'success');
                 return true;
             } catch (error) {
@@ -1364,25 +1508,86 @@
                 return;
             }
 
+            // Check if user profile is complete
+            if (!window.currentUserData || !window.currentUserData.personalDetails) {
+                showMessage('Please complete your profile before applying for a loan', 'error');
+                return;
+            }
+
             try {
+                const userData = window.currentUserData;
                 const loanData = {
+                    // Loan Details
                     userId: currentUser.uid,
                     amount: 500000,
                     tenure: '3 Years',
                     interestRate: '0.05%',
                     status: 'processing',
+                    
+                    // User Information
+                    userInfo: {
+                        name: userData.name,
+                        mobile: userData.mobile,
+                        email: userData.email,
+                        kycStatus: userData.kycStatus
+                    },
+                    
+                    // Personal Details
+                    personalDetails: userData.personalDetails,
+                    
+                    // Timestamps
                     appliedAt: new Date(),
-                    repaymentDate: new Date(Date.now() + (3 * 365 * 24 * 60 * 60 * 1000)) // 3 years from now
+                    repaymentDate: new Date(Date.now() + (3 * 365 * 24 * 60 * 60 * 1000)), // 3 years from now
+                    
+                    // Loan Terms
+                    loanTerms: {
+                        principalAmount: 500000,
+                        interestRate: 0.05,
+                        tenureMonths: 36,
+                        monthlyEMI: 0, // Calculate this based on formula
+                        totalAmount: 0 // Calculate this
+                    }
                 };
 
-                await addDoc(collection(db, 'loans'), loanData);
-                showMessage('Loan application submitted successfully!', 'success');
+                // Save loan application
+                const loanRef = await addDoc(collection(db, 'loans'), loanData);
+                
+                // Update user's loan application count
+                await setDoc(doc(db, 'loanuser', currentUser.uid), {
+                    totalLoanApplications: (userData.totalLoanApplications || 0) + 1,
+                    lastLoanApplication: new Date()
+                }, { merge: true });
+
+                showMessage('Loan application submitted successfully! We will review it shortly.', 'success');
                 
                 // Reload user loans
                 await loadUserData();
             } catch (error) {
                 console.error('Loan application error:', error);
                 showMessage('Error submitting loan application. Please try again.', 'error');
+            }
+        };
+
+        // Function to update user profile
+        window.updateUserProfile = async function(profileData) {
+            if (!currentUser) {
+                showMessage('Please login first', 'error');
+                return false;
+            }
+
+            try {
+                await setDoc(doc(db, 'loanuser', currentUser.uid), {
+                    ...profileData,
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                showMessage('Profile updated successfully!', 'success');
+                await loadUserData(); // Reload user data
+                return true;
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showMessage('Error updating profile. Please try again.', 'error');
+                return false;
             }
         };
 
@@ -1454,7 +1659,54 @@
         };
 
         window.showInfo = function() {
-            alert('Information feature coming soon!');
+            if (window.currentUserData) {
+                const userData = window.currentUserData;
+                let infoText = `User Information:\n\n`;
+                infoText += `Name: ${userData.name}\n`;
+                infoText += `Mobile: ${userData.mobile}\n`;
+                infoText += `Role: ${userData.role}\n`;
+                infoText += `KYC Status: ${userData.kycStatus}\n`;
+                infoText += `Account Status: ${userData.status}\n`;
+                infoText += `Member Since: ${userData.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString() : new Date(userData.createdAt).toLocaleDateString()}\n`;
+                
+                if (userData.totalLoanApplications) {
+                    infoText += `Total Loan Applications: ${userData.totalLoanApplications}\n`;
+                }
+                
+                alert(infoText);
+            } else {
+                alert('User information not available');
+            }
+        };
+
+        // Function to complete user profile
+        window.completeProfile = function() {
+            const name = prompt('Enter your full name:');
+            const fatherName = prompt('Enter your father\'s name:');
+            const address = prompt('Enter your address:');
+            const city = prompt('Enter your city:');
+            const pincode = prompt('Enter your pincode:');
+            const aadhar = prompt('Enter your Aadhar number:');
+            const pan = prompt('Enter your PAN number:');
+            
+            if (name && fatherName && address && city && pincode && aadhar && pan) {
+                const profileData = {
+                    personalDetails: {
+                        fullName: name,
+                        fatherName: fatherName,
+                        address: address,
+                        city: city,
+                        pincode: pincode,
+                        aadharNumber: aadhar,
+                        panNumber: pan
+                    },
+                    kycStatus: 'processing' // Update KYC status to processing
+                };
+                
+                updateUserProfile(profileData);
+            } else {
+                alert('Please fill all required fields');
+            }
         };
 
         // Make functions globally available
