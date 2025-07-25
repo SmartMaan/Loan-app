@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickCash - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --secondary: #4a42e8;
+            --accent: #ff6584;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .profile-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .welcome-banner h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .welcome-banner p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* Features Banner - Horizontal Layout */
+        .features-banner {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 0 20px 20px;
+        }
+        
+        .feature-item {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-icon {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .feature-text {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        /* Loan Banner - Compact Layout */
+        .loan-banner {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 20px 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loan-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .loan-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .loan-details {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .loan-detail {
+            flex: 1;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        .apply-btn {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .apply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Status Banners */
+        .status-banner {
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            margin: 0 20px 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .approved-banner {
+            background: linear-gradient(135deg, var(--success), #8BC34A);
+        }
+        
+        .rejected-banner {
+            background: linear-gradient(135deg, var(--danger), #e57373);
+        }
+        
+        .active-banner {
+            background: linear-gradient(135deg, #2196F3, #03A9F4);
+        }
+        
+        .processing-banner {
+            background: linear-gradient(135deg, var(--warning), #FF9800);
+        }
+        
+        .processing-animation {
+            margin: 15px 0;
+            font-size: 2rem;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Quick Actions - 2x2 Grid */
+        .quick-actions {
+            margin: 20px;
+        }
+        
+        .quick-actions-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .toggle-btn i {
+            transition: transform 0.3s;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        .actions-grid.collapsed {
+            height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+        .action-btn {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .action-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        .mobile-features-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #ffffff;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+}
+
+.feature-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 120px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+.feature-icon {
+    font-size: 24px;
+    color: #007bff;
+    margin-bottom: 8px;
+}
+
+.feature-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+.feature-desc {
+    font-size: 12px;
+    color: #718096;
+    white-space: normal;
+}
+
+/* Hide scrollbar */
+.mobile-features-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Amazon note */
+.amazon-note {
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.loan-details {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    flex-wrap: wrap; /* Add this line */
+}
+
+.loan-detail {
+    flex: 1;
+    min-width: 30%; /* Add this line to prevent items from getting too narrow */
+    margin-bottom: 10px; /* Add some spacing if they wrap */
+}
+
+.loan-repay-date {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin: 10px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loan-repay-date i {
+    font-size: 1rem;
+}
+    </style>
+</head>
+<body>
+    <!-- Header with Logo and Profile Button -->
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-money-bill-wave"></i> QuickCash
+        </div>
+        <button class="profile-btn" onclick="window.location.href='profile.php'">
+            <i class="fas fa-user"></i>
+        </button>
+    </div>
+    
+    <!-- Welcome Banner -->
+    <div class="welcome-banner slide-in">
+        <h1>Welcome, Newid!</h1>
+        <p>We're here to help you with your financial needs</p>
+    </div>
+    
+<div class="mobile-features-container">
+    <!-- Feature 1 -->
+    <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+        <div class="feature-title">Fast Approval</div>
+        <div class="feature-desc">Within Minutes</div>
+    </div>
+    
+    <!-- Feature 2 -->
+    <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="feature-title">Instant Loan</div>
+        <div class="feature-desc">Direct to Account</div>
+    </div>
+    
+    <!-- Feature 3 -->
+    <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+        <div class="feature-title">Secure Process</div>
+        <div class="feature-desc">256-bit Encryption</div>
+    </div>
+</div>
+
+<div class="amazon-note">
+    <i class="fab fa-amazon" style="color: #FF9900;"></i> Trusted by amazon - Safe & Secure - 24/7 support
+</div>
+    
+            <!-- Default Loan Banner - Compact Layout -->
+        <div class="loan-banner slide-in">
+            <div class="loan-title">Fast And Secure Loan</div>
+            <div class="loan-amount">₹500,000</div>
+            <div class="loan-details">
+                <div class="loan-detail">
+                    <div class="detail-value">3 Years</div>
+                    <div class="detail-label">Tenure</div>
+                </div>
+                <div class="loan-detail">
+                    <div class="detail-value">0.05%</div>
+                    <div class="detail-label">Interest Rate</div>
+                </div>
+                <div class="loan-detail">
+                    <div class="detail-value">Fast</div>
+                    <div class="detail-label">Approval</div>
+                </div>
+            </div>
+            <button class="apply-btn" onclick="window.location.href='details.php'">Apply Now</button>
+        </div>
+        
+    <!-- Quick Actions - 2x2 Grid -->
+    <div class="quick-actions">
+        <div class="quick-actions-title">
+            Quick Actions
+            <button class="toggle-btn" id="toggleActions">
+                <span id="toggleText">Hide</span>
+                <i class="fas fa-chevron-up" id="toggleIcon"></i>
+            </button>
+        </div>
+        
+        <div class="actions-grid" id="actionsGrid">
+            <a href="profile.php" class="action-btn">
+                <div class="action-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="action-label">Profile</div>
+            </a>
+            
+            <a href="my_loans.php" class="action-btn">
+                <div class="action-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="action-label">My Loans</div>
+            </a>
+            
+            <a href="history.php" class="action-btn">
+                <div class="action-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="action-label">History</div>
+            </a>
+            
+            <a href="repay.php" class="action-btn">
+                <div class="action-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="action-label">Repay</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="window.location.href='home.php'">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='repay.php'">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>Repay</span>
+        </div>
+    </div>
+
+    <script>
+        // Toggle quick actions with animation
+        const toggleBtn = document.getElementById('toggleActions');
+        const actionsGrid = document.getElementById('actionsGrid');
+        const toggleText = document.getElementById('toggleText');
+        const toggleIcon = document.getElementById('toggleIcon');
+        let isCollapsed = false;
+        
+        toggleBtn.addEventListener('click', function() {
+            isCollapsed = !isCollapsed;
+            
+            if (isCollapsed) {
+                actionsGrid.classList.add('collapsed');
+                toggleText.textContent = 'Show';
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+                
+                // Animate items out
+                const items = actionsGrid.querySelectorAll('.action-btn');
+                items.forEach((item, index) => {
+                    item.style.animation = `slideOut 0.3s ease-out ${index * 0.1}s forwards`;
+                });
+            } else {
+                actionsGrid.classList.remove('collapsed');
+                toggleText.textContent = 'Hide';
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+                
+                // Animate items in
+                const items = actionsGrid.querySelectorAll('.action-btn');
+                items.forEach((item, index) => {
+                    item.style.animation = `slideIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) ${index * 0.1}s forwards`;
+                });
+            }
+        });
+
+        // Add animation styles dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px) rotate(10deg);
+                }
+            }
+            
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px) rotate(-10deg);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) rotate(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
