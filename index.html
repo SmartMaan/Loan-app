@@ -848,6 +848,135 @@
             word-break: break-all;
         }
         
+        /* Logout Popup Styles */
+        .logout-popup-content {
+            max-width: 400px;
+            text-align: center;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .logout-popup-header {
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            padding: 30px 20px 20px;
+            position: relative;
+        }
+        
+        .logout-user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 15px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .logout-popup-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+        }
+        
+        .logout-user-name {
+            font-size: 16px;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .logout-popup-body {
+            padding: 30px 25px;
+            background: white;
+        }
+        
+        .logout-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .logout-message {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .logout-submessage {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .logout-popup-footer {
+            padding: 20px 25px 25px;
+            background: white;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .logout-cancel-btn, .logout-confirm-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .logout-cancel-btn {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+        
+        .logout-cancel-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logout-confirm-btn {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+        }
+        
+        .logout-confirm-btn:hover {
+            background: linear-gradient(135deg, #e84118, #ff4757);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        .logout-cancel-btn:active, .logout-confirm-btn:active {
+            transform: translateY(0);
+        }
+        
         /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
@@ -1317,6 +1446,34 @@
             </div>
             <div class="popup-footer">
                 <button class="popup-btn" onclick="hideContactPopup()">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Popup -->
+    <div class="popup-overlay" id="logoutPopup">
+        <div class="popup-content logout-popup-content">
+            <div class="logout-popup-header">
+                <div class="logout-user-avatar" id="logout-user-avatar">
+                    U
+                </div>
+                <h3 class="logout-popup-title">Logout Confirmation</h3>
+                <p class="logout-user-name" id="logout-user-name">User</p>
+            </div>
+            <div class="logout-popup-body">
+                <div class="logout-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <p class="logout-message">Are you sure you want to logout from your account?</p>
+                <p class="logout-submessage">You will need to login again to access your account.</p>
+            </div>
+            <div class="logout-popup-footer">
+                <button class="logout-cancel-btn" onclick="hideLogoutPopup()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="logout-confirm-btn" onclick="confirmLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
             </div>
         </div>
     </div>
@@ -1868,14 +2025,51 @@
         // Handle logout button click from profile page
         window.handleLogout = function() {
             console.log('🖱️ Logout button clicked from profile page');
+            showLogoutPopup();
+        };
+
+        // Show logout confirmation popup
+        window.showLogoutPopup = function() {
+            console.log('📱 Showing logout popup');
             
-            // Show confirmation dialog
-            if (confirm('Are you sure you want to logout?')) {
-                console.log('✅ User confirmed logout');
-                logout();
-            } else {
-                console.log('❌ User cancelled logout');
+            // Update popup with current user info
+            const userData = window.currentUserData || {};
+            const userName = userData.name || userData.personalDetails?.fullName || 'User';
+            
+            // Update popup elements
+            const logoutUserName = document.getElementById('logout-user-name');
+            const logoutUserAvatar = document.getElementById('logout-user-avatar');
+            
+            if (logoutUserName) {
+                logoutUserName.textContent = userName;
             }
+            
+            if (logoutUserAvatar) {
+                logoutUserAvatar.textContent = userName.charAt(0).toUpperCase();
+            }
+            
+            // Show popup
+            const popup = document.getElementById('logoutPopup');
+            if (popup) {
+                popup.classList.add('active');
+                console.log('✅ Logout popup displayed');
+            }
+        };
+
+        // Hide logout popup
+        window.hideLogoutPopup = function() {
+            console.log('❌ Hiding logout popup');
+            const popup = document.getElementById('logoutPopup');
+            if (popup) {
+                popup.classList.remove('active');
+            }
+        };
+
+        // Confirm logout from popup
+        window.confirmLogout = function() {
+            console.log('✅ User confirmed logout from popup');
+            hideLogoutPopup();
+            logout();
         };
 
         // Force redirect to auth page
@@ -2664,6 +2858,13 @@
         document.getElementById('contactPopup').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideContactPopup();
+            }
+        });
+
+        // Close logout popup when clicking outside
+        document.getElementById('logoutPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideLogoutPopup();
             }
         });
     </script>
