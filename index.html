@@ -1048,8 +1048,8 @@
             </div>
             
             <div class="tabs">
-                <div class="tab active" onclick="switchTab('login')">Login</div>
-                <div class="tab" onclick="switchTab('register')">Register</div>
+                <div class="tab active" onclick="window.switchTab('login')">Login</div>
+                <div class="tab" onclick="window.switchTab('register')">Register</div>
             </div>
             
             <!-- Display error/success messages -->
@@ -1519,10 +1519,14 @@
                 showPage('home');
             } else {
                 currentUser = null;
-                console.log('User not logged in, showing auth page');
+                console.log('User not logged in, showing login page');
                 // Show auth page and hide other pages
                 document.getElementById('auth-page').style.display = 'flex';
                 showPage('auth');
+                // Ensure login tab is active
+                setTimeout(() => {
+                    switchTab('login');
+                }, 100);
             }
         });
 
@@ -2010,8 +2014,8 @@
                 // Show success message
                 showMessage('Logged out successfully!', 'success');
                 
-                // Force redirect to auth page immediately
-                forceRedirectToAuth();
+                // Force redirect to login page immediately
+                forceRedirectToLogin();
                 
             } catch (error) {
                 console.error('❌ Logout error:', error);
@@ -2072,19 +2076,36 @@
             logout();
         };
 
-        // Force redirect to auth page
-        function forceRedirectToAuth() {
-            console.log('🔄 Forcing redirect to auth page...');
+        // Force redirect to login page
+        function forceRedirectToLogin() {
+            console.log('🔄 Forcing redirect to login page...');
             
             // Hide all pages
             document.getElementById('home-page').classList.remove('active');
             document.getElementById('profile-page').classList.remove('active');
             
-            // Show auth page
+            // Show auth page with login tab active
             document.getElementById('auth-page').style.display = 'flex';
             document.getElementById('auth-page').classList.add('active');
             
-            console.log('✅ Redirected to auth page');
+            // Clear any existing messages
+            const messageDiv = document.getElementById('auth-message');
+            if (messageDiv) {
+                messageDiv.style.display = 'none';
+            }
+            
+            // Clear forms
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            if (loginForm) loginForm.reset();
+            if (registerForm) registerForm.reset();
+            
+            // Ensure login tab is active
+            setTimeout(() => {
+                window.switchTab('login');
+            }, 100);
+            
+            console.log('✅ Redirected to login page');
         }
 
         // Force logout and redirect (fallback)
@@ -2092,7 +2113,7 @@
             console.log('🚨 Force logout and redirect...');
             currentUser = null;
             window.currentUserData = null;
-            forceRedirectToAuth();
+            forceRedirectToLogin();
         }
 
         // Loan application function
@@ -2567,18 +2588,35 @@
 
     <script>
         // Tab switching for authentication
-        function switchTab(tabName) {
+        window.switchTab = function(tabName) {
+            console.log('🔄 Switching to tab:', tabName);
+            
+            // Remove active class from all tab contents
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
+            // Remove active class from all tabs
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            document.getElementById(tabName + '-form').classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+            // Activate the selected tab content
+            const targetForm = document.getElementById(tabName + '-form');
+            if (targetForm) {
+                targetForm.classList.add('active');
+            }
+            
+            // Activate the corresponding tab
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            console.log('✅ Switched to', tabName, 'tab');
+        };
         
         // Password toggle
         function togglePassword(inputId, icon) {
