@@ -1,0 +1,960 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Quick Cash</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .profile-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover, .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            margin: 0 auto 15px;
+        }
+        
+        .user-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .user-mobile {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f8f9ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        
+        .status-badge i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .status-approved {
+            color: #4caf50;
+            background: #e8f5e9;
+        }
+        
+        .status-rejected {
+            color: #f44336;
+            background: #ffebee;
+        }
+        
+        .status-processing {
+            color: #ff9800;
+            background: #fff3e0;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .info-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4a6cf7;
+        }
+        
+        .info-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4a6cf7;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #eee;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .menu-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f8f9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: #4a6cf7;
+            font-size: 20px;
+        }
+        
+        .menu-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .logout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #e84118, #ff4757);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+        
+        /* Terms & Conditions Popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .popup-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        
+        .popup-overlay.active .popup-content {
+            transform: translateY(0);
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .popup-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4a6cf7;
+        }
+        
+        .popup-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .popup-body {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .popup-body h3 {
+            margin: 15px 0 10px;
+            color: #333;
+        }
+        
+        .popup-body p {
+            margin-bottom: 10px;
+        }
+        
+        .popup-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .popup-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .popup-btn:hover {
+            background: linear-gradient(135deg, #3a5ce4, #7a2ffa);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-item.active {
+            color: #4a6cf7;
+        }
+        
+        .nav-item:hover {
+            color: #4a6cf7;
+            transform: translateY(-3px);
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Privacy Policy Popup (same as terms popup) */
+.privacy-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.privacy-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.privacy-popup-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateY(20px);
+    transition: all 0.3s;
+}
+
+.privacy-popup-overlay.active .privacy-popup-content {
+    transform: translateY(0);
+}
+
+.privacy-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.privacy-popup-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #4a6cf7;
+}
+
+.privacy-popup-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+}
+
+.privacy-popup-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.privacy-popup-body h3 {
+    margin: 15px 0 10px;
+    color: #333;
+}
+
+.privacy-popup-body p {
+    margin-bottom: 10px;
+}
+
+.privacy-popup-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.privacy-popup-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.privacy-popup-btn:hover {
+    background: linear-gradient(135deg, #3a5ce4, #7a2ffa);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+}
+
+/* Contact Us Popup */
+.contact-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.contact-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.contact-popup-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateY(20px);
+    transition: all 0.3s;
+}
+
+.contact-popup-overlay.active .contact-popup-content {
+    transform: translateY(0);
+}
+
+.contact-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.contact-popup-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #4a6cf7;
+}
+
+.contact-popup-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+}
+
+.contact-popup-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.contact-popup-body h3 {
+    margin: 15px 0 10px;
+    color: #333;
+}
+
+.contact-popup-body p {
+    margin-bottom: 10px;
+}
+
+.contact-option {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    padding: 12px;
+    background: #f8f9ff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.contact-option:hover {
+    background: #eef1ff;
+    transform: translateX(5px);
+}
+
+.contact-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #4a6cf7;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 18px;
+}
+
+.contact-text {
+    flex: 1;
+}
+
+.contact-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.contact-value {
+    font-size: 13px;
+    color: #666;
+    word-break: break-all;
+}
+
+.contact-popup-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.contact-popup-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #4a6cf7, #8a3ffb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.contact-popup-btn:hover {
+    background: linear-gradient(135deg, #3a5ce4, #7a2ffa);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-btn" onclick="window.location.href='home.php'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="logo">
+            <i class="fas fa-money-bill-wave"></i> Quick Cash
+        </div>
+        <button class="profile-btn" onclick="window.location.href='profile.php'">
+            <i class="fas fa-user"></i>
+        </button>
+    </div>
+    
+    <div class="main-content">
+        <div class="profile-card">
+            <div class="user-avatar">
+                N            </div>
+            <h2 class="user-name">Newid</h2>
+            <div class="user-mobile">+91 99999999999</div>
+            
+                    </div>
+        
+                
+        <div class="menu-container">
+            <div class="menu-item" onclick="window.location.href='setting.php'">
+                <div class="menu-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="menu-text">Settings</div>
+            </div>
+            
+            <div class="menu-item" onclick="window.location.href='info.php'">
+                <div class="menu-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="menu-text">Information</div>
+                            </div>
+            
+            <div class="menu-item" onclick="window.location.href='my_loans.php'">
+                <div class="menu-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="menu-text">My Loans</div>
+            </div>
+            
+            <div class="menu-item" onclick="window.location.href='history.php'">
+                <div class="menu-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="menu-text">Transaction History</div>
+            </div>
+            
+            <div class="menu-item" onclick="showContactPopup()">
+                <div class="menu-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="menu-text">Contact Us</div>
+            </div>
+            
+            <div class="menu-item" onclick="showPrivacyPopup()">
+                <div class="menu-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="menu-text">Privacy Policy</div>
+            </div>
+            
+            <div class="menu-item" onclick="showTermsPopup()">
+                <div class="menu-icon">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <div class="menu-text">Terms & Conditions</div>
+            </div>
+        </div>
+        
+        <button class="logout-btn" onclick="window.location.href='logout.php'">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+    
+    <!-- Terms & Conditions Popup -->
+    <div class="popup-overlay" id="termsPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">Terms & Conditions</h3>
+                <button class="popup-close" onclick="hideTermsPopup()">&times;</button>
+            </div>
+            <div class="popup-body">
+                <h3>1. Loan Agreement</h3>
+                <p>By applying for a loan through Quick Cash, you agree to be bound by these terms and conditions. The loan is subject to approval based on our assessment of your application.</p>
+                
+                <h3>2. Interest Rates</h3>
+                <p>Interest rates vary based on loan amount, tenure, and applicant's creditworthiness. The exact rate will be disclosed in your loan approval.</p>
+                
+                <h3>3. Repayment</h3>
+                <p>You agree to repay the loan amount plus interest by the due date. Late payments may incur additional charges.</p>
+                
+                <h3>4. Privacy</h3>
+                <p>We collect and use your personal information as described in our Privacy Policy to process your application and provide services.</p>
+                
+                <h3>5. Default</h3>
+                <p>Failure to repay may result in additional charges, legal action, and reporting to credit bureaus.</p>
+                
+                <h3>6. Changes to Terms</h3>
+                <p>Quick Cash reserves the right to modify these terms at any time. Continued use of services constitutes acceptance of changes.</p>
+            </div>
+            <div class="popup-footer">
+                <button class="popup-btn" onclick="hideTermsPopup()">Got It</button>
+            </div>
+        </div>
+    </div>
+    <!-- Privacy Policy Popup -->
+<div class="privacy-popup-overlay" id="privacyPopup">
+    <div class="privacy-popup-content">
+        <div class="privacy-popup-header">
+            <h3 class="privacy-popup-title">Privacy Policy</h3>
+            <button class="privacy-popup-close" onclick="hidePrivacyPopup()">&times;</button>
+        </div>
+        <div class="privacy-popup-body">
+            <h3>1. Information Collection</h3>
+            <p>We collect personal information including name, contact details, and financial information to process your loan application and provide services.</p>
+            
+            <h3>2. Use of Information</h3>
+            <p>Your information is used to verify identity, assess creditworthiness, process transactions, and communicate with you about your account.</p>
+            
+            <h3>3. Data Protection</h3>
+            <p>We implement security measures to protect your data from unauthorized access, alteration, or disclosure.</p>
+            
+            <h3>4. Information Sharing</h3>
+            <p>We may share information with credit bureaus, regulatory authorities, and service providers as required by law or for service delivery.</p>
+            
+            <h3>5. Your Rights</h3>
+            <p>You may request access to, correction of, or deletion of your personal data, subject to legal limitations.</p>
+            
+            <h3>6. Changes to Policy</h3>
+            <p>We may update this policy periodically. Continued use of our services constitutes acceptance of the updated policy.</p>
+        </div>
+        <div class="privacy-popup-footer">
+            <button class="privacy-popup-btn" onclick="hidePrivacyPopup()">Got It</button>
+        </div>
+    </div>
+</div>
+<!-- Contact Us Popup -->
+<div class="contact-popup-overlay" id="contactPopup">
+    <div class="contact-popup-content">
+        <div class="contact-popup-header">
+            <h3 class="contact-popup-title">Contact Us</h3>
+            <button class="contact-popup-close" onclick="hideContactPopup()">&times;</button>
+        </div>
+        <div class="contact-popup-body">
+            <p>For any queries or support, please contact us through any of the following methods:</p>
+            
+            <div class="contact-option" onclick="copyToClipboard('support@quickcash.com')">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-text">
+                    <div class="contact-label">Email Us</div>
+                    <div class="contact-value">support@quickcash.com</div>
+                </div>
+            </div>
+            
+            <div class="contact-option" onclick="copyToClipboard('+919876543210')">
+                <div class="contact-icon">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <div class="contact-text">
+                    <div class="contact-label">WhatsApp</div>
+                    <div class="contact-value">+91 98765 43210</div>
+                </div>
+            </div>
+            
+            <div class="contact-option" onclick="copyToClipboard('@quickcashsupport')">
+                <div class="contact-icon">
+                    <i class="fab fa-telegram"></i>
+                </div>
+                <div class="contact-text">
+                    <div class="contact-label">Telegram</div>
+                    <div class="contact-value">@quickcashsupport</div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 13px; color: #666;">Click on any contact method to copy it</p>
+        </div>
+        <div class="contact-popup-footer">
+            <button class="contact-popup-btn" onclick="hideContactPopup()">Got It</button>
+        </div>
+    </div>
+</div>
+    
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='home.php'">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='repay.php'">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>Repay</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='history.php'">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </div>
+        <div class="nav-item active" onclick="window.location.href='profile.php'">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </div>
+    </div>
+    
+    <script>
+        // Terms & Conditions Popup
+        function showTermsPopup() {
+            document.getElementById('termsPopup').classList.add('active');
+        }
+        
+        function hideTermsPopup() {
+            document.getElementById('termsPopup').classList.remove('active');
+        }
+        
+        // Close popup when clicking outside content
+        document.getElementById('termsPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideTermsPopup();
+            }
+        });
+        
+        // Privacy Policy Popup
+function showPrivacyPopup() {
+    document.getElementById('privacyPopup').classList.add('active');
+}
+
+function hidePrivacyPopup() {
+    document.getElementById('privacyPopup').classList.remove('active');
+}
+
+// Close popup when clicking outside content
+document.getElementById('privacyPopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hidePrivacyPopup();
+    }
+});
+// Contact Us Popup
+function showContactPopup() {
+    document.getElementById('contactPopup').classList.add('active');
+}
+
+function hideContactPopup() {
+    document.getElementById('contactPopup').classList.remove('active');
+}
+
+// Close popup when clicking outside content
+document.getElementById('contactPopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideContactPopup();
+    }
+});
+
+// Improved Copy to clipboard function
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Extract just the relevant part for display
+        let displayText = text;
+        if (text.includes('@') && !text.startsWith('@')) {
+            displayText = text.split('@')[0] + '@...'; // For email
+        } else if (text.startsWith('+')) {
+            displayText = text.substring(0, 6) + '...'; // For phone numbers
+        } else if (text.startsWith('@')) {
+            displayText = text; // For Telegram handles
+        }
+        
+        // Create a temporary notification instead of alert
+        const notification = document.createElement('div');
+        notification.style.position = 'fixed';
+        notification.style.bottom = '20px';
+        notification.style.left = '50%';
+        notification.style.transform = 'translateX(-50%)';
+        notification.style.backgroundColor = '#4a6cf7';
+        notification.style.color = 'white';
+        notification.style.padding = '10px 20px';
+        notification.style.borderRadius = '5px';
+        notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        notification.style.zIndex = '10000';
+        notification.style.animation = 'fadeInOut 2s ease-in-out';
+        notification.textContent = `Copied: ${displayText}`;
+        
+        // Add keyframes for fade animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(notification);
+        
+        // Remove after animation
+        setTimeout(() => {
+            notification.remove();
+            style.remove();
+        }, 2000);
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+    </script>
+</body>
+</html>
