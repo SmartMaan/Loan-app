@@ -2035,6 +2035,32 @@
             }
         };
 
+        // Check if mobile number is already registered
+        window.checkMobileExists = async function(mobile) {
+            try {
+                console.log('🔍 Checking if mobile exists:', mobile);
+                const mobileCheckQuery = query(collection(db, 'loanusers'), where('mobile', '==', mobile));
+                const mobileCheckSnapshot = await getDocs(mobileCheckQuery);
+                
+                if (!mobileCheckSnapshot.empty) {
+                    const userData = mobileCheckSnapshot.docs[0].data();
+                    console.log('📱 Mobile number found:', {
+                        name: userData.name,
+                        mobile: userData.mobile,
+                        email: userData.email,
+                        registeredAt: new Date(userData.timestamps?.registeredAt).toLocaleString()
+                    });
+                    return true;
+                } else {
+                    console.log('✅ Mobile number is available');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error checking mobile:', error);
+                return false;
+            }
+        };
+
         // Check if user data exists in Firebase
         window.checkUserInFirebase = async function(uid) {
             try {
@@ -2411,13 +2437,58 @@
                 
                 console.log('✅ Input validation passed');
                 
+                // Check if mobile number is already registered
+                console.log('🔍 Checking if mobile number is already registered...');
+                const mobileCheckQuery = query(collection(db, 'loanusers'), where('mobile', '==', mobile));
+                const mobileCheckSnapshot = await getDocs(mobileCheckQuery);
+                
+                if (!mobileCheckSnapshot.empty) {
+                    console.log('❌ Mobile number already registered');
+                    throw new Error('This mobile number is already registered. Please use a different number or try logging in.');
+                }
+                
+                console.log('✅ Mobile number is available');
+                
                 // Create user account - use provided email or mobile@quickcash.app
                 const authEmail = userEmail && userEmail.includes('@') ? userEmail : `${mobile}@quickcash.app`;
                 console.log('📧 Creating Firebase Auth user with email:', authEmail);
                 console.log('👤 User provided email:', userEmail || 'None provided');
                 
-                const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
-                console.log('✅ Firebase Auth user created successfully');
+                // Check if the auth email is already in use (for provided emails)
+                if (userEmail && userEmail.includes('@')) {
+                    console.log('🔍 Checking if provided email is already in use...');
+                    const emailCheckQuery = query(collection(db, 'loanusers'), where('providedEmail', '==', userEmail));
+                    const emailCheckSnapshot = await getDocs(emailCheckQuery);
+                    
+                    if (!emailCheckSnapshot.empty) {
+                        console.log('❌ Provided email already registered');
+                        throw new Error('This email address is already registered. Please use a different email.');
+                    }
+                }
+                
+                let userCredential;
+                try {
+                    userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
+                    console.log('✅ Firebase Auth user created successfully');
+                } catch (authError) {
+                    console.error('❌ Firebase Auth error:', authError);
+                    
+                    // Handle specific Firebase Auth errors
+                    if (authError.code === 'auth/email-already-in-use') {
+                        if (authEmail.includes('@quickcash.app')) {
+                            throw new Error('This mobile number is already registered. Please try logging in instead.');
+                        } else {
+                            throw new Error('This email address is already registered. Please use a different email or try logging in.');
+                        }
+                    } else if (authError.code === 'auth/invalid-email') {
+                        throw new Error('Invalid email format. Please check and try again.');
+                    } else if (authError.code === 'auth/weak-password') {
+                        throw new Error('Password is too weak. Please use a stronger password.');
+                    } else {
+                        throw new Error('Registration failed: ' + authError.message);
+                    }
+                }
+                
                 console.log('👤 User UID:', userCredential.user.uid);
                 const user = userCredential.user;
 
@@ -2669,7 +2740,17 @@
                         console.log('✅ Alternative save successful');
                     } catch (altError) {
                         console.error('❌ Alternative save also failed:', altError);
-                        throw new Error(`Firebase save failed: ${saveError.message}`);
+                        
+                        // Clean up the Firebase Auth user since data save failed
+                        console.log('🧹 Cleaning up Firebase Auth user due to data save failure...');
+                        try {
+                            await user.delete();
+                            console.log('✅ Firebase Auth user deleted');
+                        } catch (deleteError) {
+                            console.error('❌ Failed to delete Firebase Auth user:', deleteError);
+                        }
+                        
+                        throw new Error(`Registration failed: Unable to save user data. Please try again.`);
                     }
                 }
 
@@ -3975,7 +4056,10 @@
                         }
                     } catch (error) {
                         console.error('❌ Registration error in form handler:', error);
-                        window.showMessage('Registration failed. Please try again.', 'error');
+                        
+                        // Show specific error message
+                        const errorMessage = error.message || 'Registration failed. Please try again.';
+                        window.showMessage(errorMessage, 'error');
                     } finally {
                         btnText.style.display = 'inline';
                         loading.style.display = 'none';
