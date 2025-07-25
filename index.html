@@ -1985,7 +1985,7 @@
         // Firebase Configuration
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, query, where, getDocs, increment } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAL5e-5eQfgf1nI6hWTnhwLFgK0Cp89aa0",
@@ -2141,6 +2141,100 @@
             }
         };
 
+        // Force create test user data (for debugging)
+        window.createTestUser = async function() {
+            try {
+                console.log('🧪 Creating test user for Firebase verification...');
+                
+                const testUID = 'test_user_' + Date.now();
+                const testUserData = {
+                    name: 'Test User',
+                    mobile: '9999999999',
+                    email: 'test@quickcash.app',
+                    providedEmail: '',
+                    uid: testUID,
+                    status: 'active',
+                    timestamps: {
+                        createdAt: Date.now(),
+                        registeredAt: Date.now(),
+                        lastUpdated: Date.now()
+                    },
+                    profileComplete: 25,
+                    kycDocuments: {
+                        status: 'pending'
+                    },
+                    loanDetails: {
+                        eligibleAmount: 25000,
+                        creditScore: 750
+                    }
+                };
+                
+                console.log('💾 Saving test user to loanusers collection...');
+                await setDoc(doc(db, 'loanusers', testUID), testUserData);
+                console.log('✅ Test user saved successfully');
+                
+                // Verify
+                const testDoc = await getDoc(doc(db, 'loanusers', testUID));
+                if (testDoc.exists()) {
+                    console.log('✅ Test user verified in database');
+                    console.log('📊 Test user data:', testDoc.data());
+                    return testUID;
+                } else {
+                    console.error('❌ Test user not found after saving');
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Error creating test user:', error);
+                return null;
+            }
+        };
+
+        // Check Firebase Firestore rules and permissions
+        window.checkFirebasePermissions = async function() {
+            try {
+                console.log('🔐 Testing Firebase permissions...');
+                
+                // Test 1: Read permission
+                console.log('📖 Testing read permission...');
+                const readTest = await getDocs(collection(db, 'loanusers'));
+                console.log('✅ Read permission OK. Found', readTest.size, 'documents');
+                
+                // Test 2: Write permission
+                console.log('✍️ Testing write permission...');
+                const writeTestRef = doc(db, 'test', 'permission_test');
+                await setDoc(writeTestRef, { test: true, timestamp: Date.now() });
+                console.log('✅ Write permission OK');
+                
+                // Test 3: Delete permission (clean up test)
+                console.log('🗑️ Testing delete permission...');
+                await deleteDoc(writeTestRef);
+                console.log('✅ Delete permission OK');
+                
+                console.log('🎉 All Firebase permissions are working correctly');
+                return true;
+            } catch (error) {
+                console.error('❌ Firebase permission error:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                if (error.code === 'permission-denied') {
+                    console.error('🚫 PERMISSION DENIED: Check Firebase Security Rules');
+                    console.log('💡 Suggested Firestore rules for testing:');
+                    console.log(`
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+                    `);
+                }
+                return false;
+            }
+        };
+
         // Loan Application Functions
         window.applyForLoan = function() {
             showPage('loan');
@@ -2189,6 +2283,39 @@
             databaseURL: firebaseConfig.databaseURL
         });
 
+        // Enhanced Firebase debugging
+        console.log('🔍 Firebase Instances Check:');
+        console.log('- App:', app ? '✅ Initialized' : '❌ Failed');
+        console.log('- Auth:', auth ? '✅ Initialized' : '❌ Failed');
+        console.log('- Firestore:', db ? '✅ Initialized' : '❌ Failed');
+        console.log('- Project ID:', firebaseConfig.projectId);
+        
+        // Test immediate Firestore connectivity
+        setTimeout(async () => {
+            try {
+                console.log('🧪 Testing immediate Firestore connectivity...');
+                const testRef = doc(db, 'test', 'connectivity');
+                await setDoc(testRef, {
+                    timestamp: Date.now(),
+                    test: 'connection_test',
+                    message: 'Firebase Firestore is working'
+                });
+                console.log('✅ Firestore write test successful');
+                
+                // Test read
+                const testDoc = await getDoc(testRef);
+                if (testDoc.exists()) {
+                    console.log('✅ Firestore read test successful:', testDoc.data());
+                } else {
+                    console.log('❌ Firestore read test failed - document not found');
+                }
+            } catch (error) {
+                console.error('❌ Firestore connectivity test failed:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+            }
+        }, 2000);
+
         // Make Firebase instances globally available
         window.firebaseApp = app;
         window.firebaseAuth = auth;
@@ -2200,6 +2327,7 @@
             collection,
             addDoc,
             updateDoc,
+            deleteDoc,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
             signOut,
@@ -2690,18 +2818,23 @@
                     // Save to loanusers collection - MAIN DATA STORAGE
                     console.log('🔥 Preparing to save to Firebase: loanusers/' + user.uid);
                     console.log('📊 Data size:', JSON.stringify(userData).length, 'characters');
+                    console.log('🗂️ Collection: loanusers');
+                    console.log('🆔 Document ID:', user.uid);
                     
                     // Test database connection first
                     console.log('🧪 Testing database connection...');
-                    await getDoc(doc(db, 'test', 'connection'));
+                    const testDoc = await getDoc(doc(db, 'test', 'connection'));
                     console.log('✅ Database connection successful');
                     
-                    console.log('💾 Saving user data to loanusers collection...');
-                    await setDoc(doc(db, 'loanusers', user.uid), userData);
-                    console.log('✅ SUCCESS: User data saved to loanusers collection');
+                    // Multiple save attempts with different methods
+                    console.log('💾 Attempt 1: Saving user data to loanusers collection...');
                     
-                    // Verify the data was saved by reading it back
-                    console.log('🔍 Verifying saved data...');
+                    // Method 1: Direct setDoc
+                    await setDoc(doc(db, 'loanusers', user.uid), userData);
+                    console.log('✅ Method 1 SUCCESS: User data saved with setDoc');
+                    
+                    // Comprehensive verification process
+                    console.log('🔍 Step 1: Verifying saved data by direct read...');
                     const savedDoc = await getDoc(doc(db, 'loanusers', user.uid));
                     if (savedDoc.exists()) {
                         const savedData = savedDoc.data();
@@ -2724,6 +2857,33 @@
                     } else {
                         console.error('❌ CRITICAL: User data not found after saving');
                         throw new Error('User data verification failed');
+                    }
+
+                    // Step 2: Verify through collection query
+                    console.log('🔍 Step 2: Verifying through collection query...');
+                    const verifyQuery = query(collection(db, 'loanusers'), where('mobile', '==', mobile));
+                    const verifySnapshot = await getDocs(verifyQuery);
+                    
+                    if (!verifySnapshot.empty) {
+                        console.log('✅ User found through mobile query');
+                        console.log('📱 Query results:', verifySnapshot.size, 'documents found');
+                    } else {
+                        console.error('❌ User not found through mobile query');
+                    }
+
+                    // Step 3: Count total documents in collection
+                    console.log('🔍 Step 3: Checking total documents in loanusers collection...');
+                    const allUsersSnapshot = await getDocs(collection(db, 'loanusers'));
+                    console.log('📊 Total users in database:', allUsersSnapshot.size);
+                    
+                    // Step 4: Force refresh and verify visibility
+                    console.log('🔍 Step 4: Final verification with fresh read...');
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                    const finalCheck = await getDoc(doc(db, 'loanusers', user.uid));
+                    if (finalCheck.exists()) {
+                        console.log('✅ FINAL VERIFICATION SUCCESSFUL - User data is persistently saved');
+                    } else {
+                        console.error('❌ FINAL VERIFICATION FAILED');
                     }
                 } catch (saveError) {
                     console.error('❌ CRITICAL ERROR saving to loanusers:', saveError);
