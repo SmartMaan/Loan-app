@@ -1531,7 +1531,7 @@
                     <div class="detail-label">Approval</div>
                 </div>
             </div>
-            <button class="apply-btn" onclick="applyForLoan()">Apply Now</button>
+            <button class="apply-btn" onclick="showPage('loan')">Apply Now</button>
         </div>
         
         <div class="quick-actions">
@@ -2083,7 +2083,7 @@
             measurementId: "G-ENCBTT4BL8"
         };
 
-        // Set max date for date of birth (18 years ago)
+        // Set max date for date of birth (18 years ago) and initialize loan functions
         window.addEventListener('DOMContentLoaded', function() {
             const dobField = document.getElementById('reg-dob');
             if (dobField) {
@@ -2091,7 +2091,64 @@
                 const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
                 dobField.max = eighteenYearsAgo.toISOString().split('T')[0];
             }
+            
+            // Initialize loan application functionality
+            const amountInput = document.getElementById('loan-amount');
+            const amountSlider = document.getElementById('amount-slider');
+            const tenureSelect = document.getElementById('loan-tenure');
+            
+            if (amountInput && amountSlider) {
+                amountSlider.addEventListener('input', function() {
+                    amountInput.value = this.value;
+                    calculateEMI();
+                });
+                
+                amountInput.addEventListener('input', function() {
+                    amountSlider.value = this.value;
+                    calculateEMI();
+                });
+            }
+            
+            if (tenureSelect) {
+                tenureSelect.addEventListener('change', calculateEMI);
+            }
         });
+
+        // Loan Application Functions
+        window.applyForLoan = function() {
+            showPage('loan');
+        };
+
+        // EMI Calculator
+        function calculateEMI() {
+            const amount = parseFloat(document.getElementById('loan-amount')?.value) || 0;
+            const tenure = parseInt(document.getElementById('loan-tenure')?.value) || 0;
+            const rate = 12; // 12% annual interest rate
+            
+            if (amount > 0 && tenure > 0) {
+                const monthlyRate = rate / 12 / 100;
+                const emi = (amount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / 
+                           (Math.pow(1 + monthlyRate, tenure) - 1);
+                const totalAmount = emi * tenure;
+                const totalInterest = totalAmount - amount;
+                
+                const monthlyEmiElement = document.getElementById('monthly-emi');
+                const totalInterestElement = document.getElementById('total-interest');
+                const totalAmountElement = document.getElementById('total-amount');
+                
+                if (monthlyEmiElement) monthlyEmiElement.textContent = `₹${Math.round(emi).toLocaleString()}`;
+                if (totalInterestElement) totalInterestElement.textContent = `₹${Math.round(totalInterest).toLocaleString()}`;
+                if (totalAmountElement) totalAmountElement.textContent = `₹${Math.round(totalAmount).toLocaleString()}`;
+            } else {
+                const monthlyEmiElement = document.getElementById('monthly-emi');
+                const totalInterestElement = document.getElementById('total-interest');
+                const totalAmountElement = document.getElementById('total-amount');
+                
+                if (monthlyEmiElement) monthlyEmiElement.textContent = '₹0';
+                if (totalInterestElement) totalInterestElement.textContent = '₹0';
+                if (totalAmountElement) totalAmountElement.textContent = '₹0';
+            }
+        }
 
         // Initialize Firebase
         console.log('Initializing Firebase...');
@@ -3824,6 +3881,80 @@
                     } catch (error) {
                         console.error('❌ Registration error in form handler:', error);
                         window.showMessage('Registration failed. Please try again.', 'error');
+                    } finally {
+                        btnText.style.display = 'inline';
+                        loading.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+            
+            // Loan application form submission
+            const loanForm = document.getElementById('loanApplicationForm');
+            if (loanForm) {
+                loanForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = {
+                        loanAmount: document.getElementById('loan-amount').value,
+                        loanTenure: document.getElementById('loan-tenure').value,
+                        loanPurpose: document.getElementById('loan-purpose').value,
+                        acceptLoanTerms: document.getElementById('loan-terms').checked
+                    };
+                    
+                    if (!formData.acceptLoanTerms) {
+                        showMessage('Please accept the loan terms and conditions', 'error');
+                        return;
+                    }
+                    
+                    const submitBtn = this.querySelector('.apply-loan-btn');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const loading = submitBtn.querySelector('.loading');
+                    
+                    btnText.style.display = 'none';
+                    loading.style.display = 'inline-block';
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        const user = auth.currentUser;
+                        if (!user) {
+                            throw new Error('User not authenticated');
+                        }
+                        
+                        const loanApplication = {
+                            userId: user.uid,
+                            amount: parseFloat(formData.loanAmount),
+                            tenure: parseInt(formData.loanTenure),
+                            purpose: formData.loanPurpose,
+                            status: 'pending',
+                            appliedAt: Date.now(),
+                            monthlyEMI: parseFloat(document.getElementById('monthly-emi').textContent.replace('₹', '').replace(/,/g, '')),
+                            totalAmount: parseFloat(document.getElementById('total-amount').textContent.replace('₹', '').replace(/,/g, '')),
+                            interestRate: 12,
+                            processingFee: Math.round(parseFloat(formData.loanAmount) * 0.02) // 2% processing fee
+                        };
+                        
+                        // Save loan application to Firebase
+                        await addDoc(collection(db, 'loanApplications'), loanApplication);
+                        
+                        // Update user's loan count
+                        await updateDoc(doc(db, 'loanusers', user.uid), {
+                            'loanDetails.totalApplications': increment(1),
+                            'timestamps.lastUpdated': Date.now()
+                        });
+                        
+                        showMessage('Loan application submitted successfully! We will review your application within 24 hours.', 'success');
+                        this.reset();
+                        calculateEMI(); // Reset EMI display
+                        
+                        // Redirect to home after 2 seconds
+                        setTimeout(() => {
+                            showPage('home');
+                        }, 2000);
+                        
+                    } catch (error) {
+                        console.error('Error submitting loan application:', error);
+                        showMessage('Failed to submit loan application. Please try again.', 'error');
                     } finally {
                         btnText.style.display = 'inline';
                         loading.style.display = 'none';
