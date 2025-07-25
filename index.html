@@ -1333,10 +1333,14 @@
                 console.log('Loading user data for:', user.uid);
                 await loadUserData();
                 console.log('Redirecting to home page');
+                // Hide auth page and show home page
+                document.getElementById('auth-page').style.display = 'none';
                 showPage('home');
             } else {
                 currentUser = null;
                 console.log('User not logged in, showing auth page');
+                // Show auth page and hide other pages
+                document.getElementById('auth-page').style.display = 'flex';
                 showPage('auth');
             }
         });
@@ -1436,6 +1440,20 @@
         window.registerUser = async function(name, mobile, password) {
             try {
                 console.log('Starting registration for:', mobile);
+                
+                // Validate input
+                if (!name || !mobile || !password) {
+                    throw new Error('All fields are required');
+                }
+                
+                if (mobile.length < 10) {
+                    throw new Error('Please enter a valid 10-digit mobile number');
+                }
+                
+                if (password.length < 6) {
+                    throw new Error('Password must be at least 6 characters long');
+                }
+                
                 // Create user account using mobile as email (mobile@quickcash.app)
                 const email = `${mobile}@quickcash.app`;
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -1539,10 +1557,17 @@
                         outstandingAmount: 0,
                         rejectedLoans: 0,
                         repaymentHistory: "No History",
-                        riskCategory: "Medium",
+                        riskCategory: "Low",
                         totalApplications: 0,
                         totalBorrowed: 0,
-                        totalRepaid: 0
+                        totalRepaid: 0,
+                        nextDueDate: null,
+                        loanPurpose: "",
+                        guarantorDetails: {
+                            name: "",
+                            mobile: "",
+                            relation: ""
+                        }
                     },
                     mobile: mobile,
                     name: name,
@@ -1577,12 +1602,16 @@
                         },
                         repaymentPreference: "Monthly"
                     },
-                    profileComplete: 30,
+                    profileComplete: 25,
+                    appVersion: "1.0.0",
+                    deviceId: `${navigator.platform}_${Date.now()}`,
                     referralInfo: {
                         referralCode: `QC${mobile.substring(0, 4)}${name.substring(0, 2).toUpperCase()}${mobile.substring(6, 8)}`,
                         referralEarnings: 0,
                         successfulReferrals: 0,
-                        totalReferrals: 0
+                        totalReferrals: 0,
+                        referredBy: "",
+                        referralBonus: 0
                     },
                     role: "user",
                     sessionInfo: {
@@ -1615,12 +1644,33 @@
                 await setDoc(doc(db, 'loanusers', user.uid), userData);
                 console.log('User data saved successfully');
 
+                // Also save a backup in 'users' collection for additional reference
+                await setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    name: name,
+                    mobile: mobile,
+                    email: email,
+                    createdAt: currentTimestamp,
+                    role: 'user',
+                    status: 'active'
+                });
+
                 showMessage('Registration successful! Redirecting to home page...', 'success');
                 console.log('Registration completed successfully');
+                
+                // Clear the form
+                document.getElementById('registerForm').reset();
+                
+                // The onAuthStateChanged listener will automatically handle the redirect
                 return true;
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage(getErrorMessage(error.code), 'error');
+                // Handle custom validation errors
+                if (error.message && !error.code) {
+                    showMessage(error.message, 'error');
+                } else {
+                    showMessage(getErrorMessage(error.code), 'error');
+                }
                 return false;
             }
         };
@@ -1628,6 +1678,16 @@
         window.loginUser = async function(mobile, password) {
             try {
                 console.log('Starting login for:', mobile);
+                
+                // Validate input
+                if (!mobile || !password) {
+                    throw new Error('Mobile number and password are required');
+                }
+                
+                if (mobile.length < 10) {
+                    throw new Error('Please enter a valid 10-digit mobile number');
+                }
+                
                 const email = `${mobile}@quickcash.app`;
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log('Login successful for:', userCredential.user.uid);
@@ -1650,18 +1710,44 @@
                 
                 showMessage('Login successful! Redirecting to home page...', 'success');
                 console.log('Login completed successfully');
+                
+                // Clear the form
+                document.getElementById('loginForm').reset();
+                
+                // The onAuthStateChanged listener will automatically handle the redirect
                 return true;
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage(getErrorMessage(error.code), 'error');
+                // Handle custom validation errors
+                if (error.message && !error.code) {
+                    showMessage(error.message, 'error');
+                } else {
+                    showMessage(getErrorMessage(error.code), 'error');
+                }
                 return false;
             }
         };
 
         window.logout = async function() {
             try {
+                // Update user status to offline before logout
+                if (currentUser) {
+                    await setDoc(doc(db, 'loanusers', currentUser.uid), {
+                        'sessionInfo.isOnline': false,
+                        'timestamps.lastLogout': Date.now()
+                    }, { merge: true });
+                }
+                
                 await signOut(auth);
                 showMessage('Logged out successfully!', 'success');
+                
+                // Clear any cached user data
+                currentUser = null;
+                window.currentUserData = null;
+                
+                // Show auth page
+                document.getElementById('auth-page').style.display = 'flex';
+                showPage('auth');
             } catch (error) {
                 console.error('Logout error:', error);
                 showMessage('Error logging out. Please try again.', 'error');
@@ -1675,57 +1761,123 @@
                 return;
             }
 
-            // Check if user profile is complete
-            if (!window.currentUserData || !window.currentUserData.personalDetails) {
-                showMessage('Please complete your profile before applying for a loan', 'error');
-                return;
-            }
-
             try {
-                const userData = window.currentUserData;
+                const userData = window.currentUserData || {};
+                const currentTimestamp = Date.now();
+                
+                // Calculate EMI (simple calculation)
+                const principal = 500000;
+                const rate = 0.05 / 100 / 12; // Monthly rate
+                const tenure = 36; // months
+                const emi = Math.round((principal * rate * Math.pow(1 + rate, tenure)) / (Math.pow(1 + rate, tenure) - 1));
+                const totalAmount = emi * tenure;
+                
                 const loanData = {
-                    // Loan Details
+                    // Basic loan information
+                    loanId: `LN${Date.now()}${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
                     userId: currentUser.uid,
-                    amount: 500000,
-                    tenure: '3 Years',
-                    interestRate: '0.05%',
-                    status: 'processing',
+                    applicationNumber: `QC${Date.now().toString().slice(-8)}`,
                     
-                    // User Information
-                    userInfo: {
-                        name: userData.name,
-                        mobile: userData.mobile,
-                        email: userData.email,
-                        kycStatus: userData.kycStatus
+                    // Loan amount and terms
+                    loanAmount: {
+                        requested: 500000,
+                        approved: 0,
+                        disbursed: 0,
+                        currency: "INR"
                     },
                     
-                    // Personal Details
-                    personalDetails: userData.personalDetails,
+                    loanTerms: {
+                        principalAmount: principal,
+                        interestRate: 0.05,
+                        tenureYears: 3,
+                        tenureMonths: tenure,
+                        monthlyEMI: emi,
+                        totalAmount: totalAmount,
+                        processingFee: Math.round(principal * 0.02), // 2% processing fee
+                        latePaymentFee: 500,
+                        prepaymentCharges: "2% of outstanding amount"
+                    },
+                    
+                    // Application status
+                    status: {
+                        current: "pending",
+                        history: [
+                            {
+                                status: "submitted",
+                                timestamp: currentTimestamp,
+                                remarks: "Application submitted successfully"
+                            }
+                        ]
+                    },
+                    
+                    // User information
+                    applicantInfo: {
+                        name: userData.name || "User",
+                        mobile: userData.mobile || "",
+                        email: userData.email || "",
+                        kycStatus: userData.kycDocuments?.status || "pending",
+                        creditScore: userData.financialDetails?.creditScore || 750
+                    },
+                    
+                    // Loan purpose and details
+                    loanPurpose: "Personal Loan",
+                    loanType: "unsecured",
+                    repaymentMode: "monthly",
                     
                     // Timestamps
-                    appliedAt: new Date(),
-                    repaymentDate: new Date(Date.now() + (3 * 365 * 24 * 60 * 60 * 1000)), // 3 years from now
+                    timestamps: {
+                        applied: currentTimestamp,
+                        submitted: currentTimestamp,
+                        lastUpdated: currentTimestamp,
+                        expectedDisbursal: currentTimestamp + (7 * 24 * 60 * 60 * 1000), // 7 days from now
+                        repaymentStartDate: null,
+                        maturityDate: null
+                    },
                     
-                    // Loan Terms
-                    loanTerms: {
-                        principalAmount: 500000,
-                        interestRate: 0.05,
-                        tenureMonths: 36,
-                        monthlyEMI: 0, // Calculate this based on formula
-                        totalAmount: 0 // Calculate this
+                    // Documents required
+                    documentsRequired: {
+                        aadharCard: { uploaded: false, verified: false },
+                        panCard: { uploaded: false, verified: false },
+                        bankStatement: { uploaded: false, verified: false },
+                        salarySlip: { uploaded: false, verified: false },
+                        photo: { uploaded: false, verified: false }
+                    },
+                    
+                    // Approval workflow
+                    approvalWorkflow: {
+                        step1_document_verification: { status: "pending", timestamp: null },
+                        step2_credit_check: { status: "pending", timestamp: null },
+                        step3_manager_approval: { status: "pending", timestamp: null },
+                        step4_final_approval: { status: "pending", timestamp: null }
+                    },
+                    
+                    // Comments and notes
+                    comments: [],
+                    internalNotes: "",
+                    customerNotes: "",
+                    
+                    // Risk assessment
+                    riskAssessment: {
+                        score: 0,
+                        category: "pending",
+                        factors: []
                     }
                 };
 
                 // Save loan application
+                console.log('Saving loan application to Firebase...');
                 const loanRef = await addDoc(collection(db, 'loans'), loanData);
+                console.log('Loan application saved with ID:', loanRef.id);
                 
-                // Update user's loan application count
+                // Update user's loan application count and details
                 await setDoc(doc(db, 'loanusers', currentUser.uid), {
                     'loanDetails.totalApplications': increment(1),
-                    'timestamps.lastUpdated': Date.now()
+                    'loanDetails.activeLoans': increment(1),
+                    'timestamps.lastUpdated': currentTimestamp,
+                    'timestamps.lastLoanApplication': currentTimestamp
                 }, { merge: true });
 
-                showMessage('Loan application submitted successfully! We will review it shortly.', 'success');
+                showMessage('Loan application submitted successfully! Application ID: ' + loanData.applicationNumber, 'success');
                 
                 // Reload user loans
                 await loadUserData();
@@ -1787,7 +1939,32 @@
         // Page navigation
         window.showPage = function(pageName) {
             console.log('Showing page:', pageName);
-            const pages = document.querySelectorAll('.page');
+            
+            // Special handling for auth page
+            if (pageName === 'auth') {
+                const authPage = document.getElementById('auth-page');
+                if (authPage) {
+                    authPage.style.display = 'flex';
+                    authPage.classList.add('active');
+                }
+                
+                // Hide all other pages
+                const otherPages = document.querySelectorAll('.page:not(#auth-page)');
+                otherPages.forEach(page => {
+                    page.classList.remove('active');
+                });
+                return;
+            }
+            
+            // Hide auth page for other pages
+            const authPage = document.getElementById('auth-page');
+            if (authPage) {
+                authPage.style.display = 'none';
+                authPage.classList.remove('active');
+            }
+            
+            // Handle other pages
+            const pages = document.querySelectorAll('.page:not(#auth-page)');
             pages.forEach(page => {
                 page.classList.remove('active');
                 console.log('Hiding page:', page.id);
@@ -1863,32 +2040,145 @@
 
         // Function to complete user profile
         window.completeProfile = function() {
-            const name = prompt('Enter your full name:');
-            const fatherName = prompt('Enter your father\'s name:');
-            const address = prompt('Enter your address:');
-            const city = prompt('Enter your city:');
-            const pincode = prompt('Enter your pincode:');
-            const aadhar = prompt('Enter your Aadhar number:');
-            const pan = prompt('Enter your PAN number:');
+            // Create a simple form popup for better UX
+            const formHtml = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;">
+                        <h3 style="margin-bottom: 20px; color: #4a6cf7; text-align: center;">Complete Your Profile</h3>
+                        <form id="profileForm">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Full Name *</label>
+                                <input type="text" id="profile-name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Father's Name *</label>
+                                <input type="text" id="profile-father" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Date of Birth *</label>
+                                <input type="date" id="profile-dob" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Gender *</label>
+                                <select id="profile-gender" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Address *</label>
+                                <textarea id="profile-address" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; height: 60px;" required></textarea>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">City *</label>
+                                <input type="text" id="profile-city" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Pincode *</label>
+                                <input type="text" id="profile-pincode" pattern="[0-9]{6}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Aadhar Number *</label>
+                                <input type="text" id="profile-aadhar" pattern="[0-9]{12}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">PAN Number *</label>
+                                <input type="text" id="profile-pan" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-transform: uppercase;" required>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4a6cf7, #8a3ffb); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Profile</button>
+                                <button type="button" onclick="this.closest('div').parentElement.remove()" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
             
-            if (name && fatherName && address && city && pincode && aadhar && pan) {
-                const profileData = {
-                    'personalDetails.fullName': name,
-                    'personalDetails.fatherName': fatherName,
-                    'addressDetails.currentAddress.street': address,
-                    'addressDetails.currentAddress.city': city,
-                    'addressDetails.currentAddress.pincode': pincode,
-                    'kycDocuments.aadharNumber': aadhar,
-                    'kycDocuments.panNumber': pan,
-                    'kycDocuments.status': 'processing',
-                    'profileComplete': 60
+            const formContainer = document.createElement('div');
+            formContainer.innerHTML = formHtml;
+            document.body.appendChild(formContainer);
+            
+            // Handle form submission
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('profile-name').value,
+                    father: document.getElementById('profile-father').value,
+                    dob: document.getElementById('profile-dob').value,
+                    gender: document.getElementById('profile-gender').value,
+                    address: document.getElementById('profile-address').value,
+                    city: document.getElementById('profile-city').value,
+                    pincode: document.getElementById('profile-pincode').value,
+                    aadhar: document.getElementById('profile-aadhar').value,
+                    pan: document.getElementById('profile-pan').value.toUpperCase()
                 };
                 
-                updateUserProfile(profileData);
-            } else {
-                alert('Please fill all required fields');
-            }
+                // Validate all fields
+                if (!formData.name || !formData.father || !formData.dob || !formData.gender || 
+                    !formData.address || !formData.city || !formData.pincode || 
+                    !formData.aadhar || !formData.pan) {
+                    alert('Please fill all required fields');
+                    return;
+                }
+                
+                // Validate Aadhar (12 digits)
+                if (!/^[0-9]{12}$/.test(formData.aadhar)) {
+                    alert('Please enter a valid 12-digit Aadhar number');
+                    return;
+                }
+                
+                // Validate PAN (5 letters, 4 digits, 1 letter)
+                if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.pan)) {
+                    alert('Please enter a valid PAN number (e.g., ABCDE1234F)');
+                    return;
+                }
+                
+                // Validate Pincode (6 digits)
+                if (!/^[0-9]{6}$/.test(formData.pincode)) {
+                    alert('Please enter a valid 6-digit pincode');
+                    return;
+                }
+                
+                const profileData = {
+                    'personalDetails.fullName': formData.name,
+                    'personalDetails.fatherName': formData.father,
+                    'personalDetails.dateOfBirth': formData.dob,
+                    'personalDetails.gender': formData.gender,
+                    'personalDetails.age': calculateAge(formData.dob),
+                    'addressDetails.currentAddress.street': formData.address,
+                    'addressDetails.currentAddress.city': formData.city,
+                    'addressDetails.currentAddress.pincode': formData.pincode,
+                    'kycDocuments.aadharNumber': formData.aadhar,
+                    'kycDocuments.panNumber': formData.pan,
+                    'kycDocuments.status': 'processing',
+                    'profileComplete': 75,
+                    'isVerified': false,
+                    'name': formData.name // Update main name field too
+                };
+                
+                const success = await updateUserProfile(profileData);
+                if (success) {
+                    formContainer.remove();
+                }
+            });
         };
+        
+        // Helper function to calculate age
+        function calculateAge(dateOfBirth) {
+            const today = new Date();
+            const birthDate = new Date(dateOfBirth);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            return age;
+        }
 
         // Make functions globally available
         window.loadUserData = loadUserData;
