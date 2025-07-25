@@ -1,0 +1,168 @@
+{
+  "loanusers": {
+    "ZmRExELKP0RyNIZlQBVGvzizhvo2": {
+      "accountType": "individual",
+      "addressDetails": {
+        "currentAddress": {
+          "city": "",
+          "district": "",
+          "landmark": "",
+          "pincode": "",
+          "residenceType": "",
+          "state": "",
+          "stayingFrom": "",
+          "street": ""
+        },
+        "permanentAddress": {
+          "city": "",
+          "district": "",
+          "landmark": "",
+          "pincode": "",
+          "sameAsCurrent": false,
+          "state": "",
+          "street": ""
+        }
+      },
+      "adminNotes": {
+        "internalRating": "Good",
+        "notes": "",
+        "specialInstructions": "",
+        "supportTickets": 0
+      },
+      "contactInfo": {
+        "alternateEmail": "",
+        "email": "loanmaan10@gmail.com",
+        "primaryPhone": "9090909090",
+        "secondaryPhone": "",
+        "telegram": "",
+        "whatsapp": "9090909090"
+      },
+      "email": "loanmaan10@gmail.com",
+      "emailVerified": false,
+      "employmentDetails": {
+        "annualIncome": 0,
+        "companyAddress": "",
+        "companyName": "",
+        "designation": "",
+        "employmentType": "",
+        "monthlyIncome": 0,
+        "officePhone": "",
+        "salaryMode": "",
+        "workExperience": 0,
+        "workingYears": 0
+      },
+      "financialDetails": {
+        "bankAccount": {
+          "accountHolderName": "",
+          "accountNumber": "",
+          "accountType": "",
+          "bankName": "",
+          "branchName": "",
+          "ifscCode": ""
+        },
+        "creditScore": 750,
+        "monthlyEMI": 0,
+        "monthlyExpenses": 0
+      },
+      "isActive": true,
+      "isVerified": false,
+      "kycDocuments": {
+        "aadharNumber": "",
+        "documentsUploaded": {
+          "aadharBack": false,
+          "aadharFront": false,
+          "bankStatement": false,
+          "panCard": false,
+          "photo": false,
+          "salarySlip": false,
+          "signature": false
+        },
+        "drivingLicenseNumber": "",
+        "level": 0,
+        "panNumber": "",
+        "passportNumber": "",
+        "status": "pending",
+        "voterIdNumber": ""
+      },
+      "loanDetails": {
+        "activeLoans": 0,
+        "approvedLoans": 0,
+        "completedLoans": 0,
+        "creditLimit": 50000,
+        "defaultedLoans": 0,
+        "eligibleAmount": 25000,
+        "outstandingAmount": 0,
+        "rejectedLoans": 0,
+        "repaymentHistory": "No History",
+        "riskCategory": "Medium",
+        "totalApplications": 0,
+        "totalBorrowed": 0,
+        "totalRepaid": 0
+      },
+      "mobile": "9090909090",
+      "name": "90ul",
+      "password": "111111",
+      "personalDetails": {
+        "age": 0,
+        "category": "",
+        "dateOfBirth": "",
+        "experience": 0,
+        "fatherName": "",
+        "fullName": "90ul",
+        "gender": "",
+        "maritalStatus": "",
+        "motherName": "",
+        "nationality": "Indian",
+        "occupation": "",
+        "qualification": "",
+        "religion": ""
+      },
+      "phone": "9090909090",
+      "phoneVerified": true,
+      "preferences": {
+        "communicationMode": "WhatsApp",
+        "currency": "INR",
+        "language": "Hindi",
+        "notifications": {
+          "email": true,
+          "marketing": false,
+          "push": true,
+          "sms": true,
+          "whatsapp": true
+        },
+        "repaymentPreference": "Monthly"
+      },
+      "profileComplete": 30,
+      "referralInfo": {
+        "referralCode": "QC9090OD0A",
+        "referralEarnings": 0,
+        "successfulReferrals": 0,
+        "totalReferrals": 0
+      },
+      "role": "user",
+      "sessionInfo": {
+        "deviceInfo": {
+          "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+          "language": "en-IN",
+          "platform": "Linux armv81",
+          "timezone": "Asia/Calcutta"
+        },
+        "isOnline": true,
+        "lastLoginDevice": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "lastLoginIP": "",
+        "loginCount": 1,
+        "totalSessions": 1
+      },
+      "status": "active",
+      "timestamps": {
+        "createdAt": 1753441812370,
+        "lastLogin": 1753441812370,
+        "lastUpdated": 1753441812370,
+        "profileLastUpdated": 1753441812370,
+        "registeredAt": 1753441812370
+      },
+      "uid": "ZmRExELKP0RyNIZlQBVGvzizhvo2",
+      "username": "90ul_9090"
+    }
+  }
+}
